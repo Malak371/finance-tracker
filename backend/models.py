@@ -23,3 +23,13 @@ class Expense(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="expenses")
     
+class Budget(Base):
+    __tablename__ = "budgets"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    category = Column(String, index=True)
+    amount = Column(Float)
+
+    user = relationship("User", back_populates="budgets")
+
+User.budgets = relationship("Budget", back_populates="user")

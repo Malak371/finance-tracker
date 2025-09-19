@@ -34,3 +34,12 @@ class ExpenseOut(BaseModel):
 class DashboardSummary(BaseModel):
     total_spent: float
     breakdown: dict
+
+class BudgetCreate(BaseModel):
+    category: str
+    amount: float
+
+class BudgetOut(BudgetCreate):
+    id: int
+    class Config:
+        orm_mode = True
