@@ -19,7 +19,6 @@ def list_expenses(category: str = None, db: Session = Depends(database.get_db), 
 
 @router.put("/{expense_id}", response_model=schemas.ExpenseOut)
 def update_expense(expense_id: int, expense: schemas.ExpenseCreate, db: Session = Depends(database.get_db), user=Depends(get_current_user)):
-    # Fix: use models.Expense instead of crud.Expense
     db_exp = db.query(models.Expense).filter(models.Expense.id == expense_id, models.Expense.user_id == user.id).first()
     if not db_exp:
         raise HTTPException(status_code=404, detail="Expense not found")
@@ -34,7 +33,6 @@ def update_expense(expense_id: int, expense: schemas.ExpenseCreate, db: Session 
 
 @router.delete("/{expense_id}", status_code=204)
 def delete_expense(expense_id: int, db: Session = Depends(database.get_db), user=Depends(get_current_user)):
-    # Fix: use models.Expense
     db_exp = db.query(models.Expense).filter(models.Expense.id == expense_id, models.Expense.user_id == user.id).first()
     if not db_exp:
         raise HTTPException(status_code=404, detail="Expense not found")

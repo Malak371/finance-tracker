@@ -29,7 +29,6 @@ def update_budget(budget_id: int, budget: BudgetCreate, db: Session = Depends(ge
     if not db_budget:
         raise HTTPException(status_code=404, detail="Budget not found")
 
-    # Check for duplicate category if changed
     if db_budget.category != budget.category:
         existing = db.query(Budget).filter(Budget.user_id == user.id, Budget.category == budget.category).first()
         if existing:
