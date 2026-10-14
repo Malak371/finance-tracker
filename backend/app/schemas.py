@@ -263,6 +263,7 @@ class RecurringChargeOut(BaseModel):
     next_date: date
     active: bool
     previous_amount: MoneyOut | None
+    price_changed_on: date | None
 
 
 class RecurringSummary(BaseModel):

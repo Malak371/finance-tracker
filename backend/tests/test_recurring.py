@@ -28,8 +28,12 @@ def test_detects_a_monthly_subscription_with_varying_reference_numbers():
 
 
 def test_reports_a_price_change():
-    [found] = detect_recurring(monthly("SPOTIFY", [9.99, 9.99, 9.99, 11.99]), TODAY)
+    [found] = detect_recurring(monthly("SPOTIFY", [9.99, 9.99, 11.99, 11.99, 11.99]), TODAY)
     assert (found.amount, found.previous_amount) == (Decimal("11.99"), Decimal("9.99"))
+    assert found.price_changed_on == date(2026, 1, 3) + timedelta(days=62)
+
+    [unchanged] = detect_recurring(monthly("RENT", [900] * 4), TODAY)
+    assert (unchanged.previous_amount, unchanged.price_changed_on) == (None, None)
 
 
 def test_weekly_and_yearly_cadences():

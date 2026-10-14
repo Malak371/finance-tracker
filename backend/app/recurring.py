@@ -51,7 +51,9 @@ class RecurringCharge:
     last_date: date
     next_date: date
     active: bool
-    previous_amount: Decimal | None  # set when the latest charge differs from the one before
+    # The most recent price change: what it cost before, and the first charge at today's price.
+    previous_amount: Decimal | None
+    price_changed_on: date | None
 
 
 def _cadence_for(gaps: list[int]) -> str | None:
@@ -100,7 +102,11 @@ def detect_recurring(charges: list[Charge], today: date) -> list[RecurringCharge
         next_date = latest.date + timedelta(days=typical_gap)
         # Allow half a cycle of slack before suggesting it may have been cancelled.
         active = today <= next_date + timedelta(days=max(3, typical_gap // 2))
-        previous = group[-2].amount if len(group) > 1 else None
+        previous_amount = price_changed_on = None
+        for later, earlier in pairwise(reversed(group)):
+            if earlier.amount != latest.amount:
+                previous_amount, price_changed_on = earlier.amount, later.date
+                break
         found.append(
             RecurringCharge(
                 merchant=latest.description,
@@ -113,7 +119,8 @@ def detect_recurring(charges: list[Charge], today: date) -> list[RecurringCharge
                 last_date=latest.date,
                 next_date=next_date,
                 active=active,
-                previous_amount=previous if previous is not None and previous != latest.amount else None,
+                previous_amount=previous_amount,
+                price_changed_on=price_changed_on,
             )
         )
     return sorted(found, key=lambda r: (not r.active, -r.monthly_cost))
