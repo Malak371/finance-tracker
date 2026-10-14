@@ -1,0 +1,44 @@
+# Runs the whole app locally: docker compose up --build
+#   Frontend  http://localhost:8080
+#   API       http://localhost:8000 (docs at /docs)
+# If those ports are taken: FRONTEND_PORT=3000 API_PORT=9000 docker compose up --build
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: finance_tracker
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d finance_tracker"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/finance_tracker
+      # Local development only. Set a real secret (and never commit it) for any deployment.
+      JWT_SECRET: ${JWT_SECRET:-local-development-only-secret-do-not-deploy}
+      CORS_ORIGINS: http://localhost:${FRONTEND_PORT:-8080}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:${API_PORT:-8000}
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
