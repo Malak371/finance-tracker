@@ -16,9 +16,29 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # and response timing doesn't reveal which emails are registered.
 _DUMMY_HASH = security.hash_password("timing-equaliser")
 
+# Brute-force protection. Failed logins are limited per email (so rotating IPs doesn't help an
+# attacker) and per IP (so spraying many emails from one address doesn't either).
+FAILED_LOGIN_WINDOW = 15 * 60
+failed_logins_by_email = SlidingWindowLimiter(limit=10, window=FAILED_LOGIN_WINDOW)
+failed_logins_by_ip = SlidingWindowLimiter(limit=30, window=FAILED_LOGIN_WINDOW)
+signup_limiter = SlidingWindowLimiter(limit=10, window=3600)
+
+
+def client_ip(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
+
+
+def _too_many(limiter: SlidingWindowLimiter, key: str, message: str) -> HTTPException:
+    return HTTPException(
+        status_code=429, detail=message, headers={"Retry-After": str(limiter.retry_after(key))}
+    )
+
 
 @router.post("/signup", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)
-def signup(payload: schemas.UserCreate, db: DB):
+def signup(payload: schemas.UserCreate, request: Request, db: DB):
+    ip = client_ip(request)
+    if not signup_limiter.allow(ip):
+        raise _too_many(signup_limiter, ip, "Too many sign-ups from this network. Please try again later.")
     if db.scalar(select(models.User).where(models.User.email == payload.email)):
         raise HTTPException(status_code=409, detail="An account with this email already exists")
     user = models.User(email=payload.email, hashed_password=security.hash_password(payload.password))
@@ -28,11 +48,23 @@ def signup(payload: schemas.UserCreate, db: DB):
 
 
 @router.post("/login", response_model=schemas.Token)
-def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: DB):
-    user = db.scalar(select(models.User).where(models.User.email == form.username.strip().lower()))
+def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], request: Request, db: DB):
+    email = form.username.strip().lower()
+    ip = client_ip(request)
+    message = "Too many failed attempts. Please wait a few minutes and try again."
+    if failed_logins_by_email.is_limited(email):
+        raise _too_many(failed_logins_by_email, email, message)
+    if failed_logins_by_ip.is_limited(ip):
+        raise _too_many(failed_logins_by_ip, ip, message)
+
+    user = db.scalar(select(models.User).where(models.User.email == email))
     password_ok = security.verify_password(form.password, user.hashed_password if user else _DUMMY_HASH)
     if user is None or not password_ok:
+        failed_logins_by_email.record(email)
+        failed_logins_by_ip.record(ip)
         raise HTTPException(status_code=401, detail="Incorrect email or password")
+
+    failed_logins_by_email.clear(email)
     return {"access_token": security.create_access_token(user.id)}
 
 
@@ -67,9 +99,9 @@ def start_demo(request: Request, db: DB):
     Every visitor gets their own copy, so nobody sees anyone else's changes. Demo accounts
     cannot log in with a password and are deleted after 24 hours.
     """
-    client_ip = request.client.host if request.client else "unknown"
-    if not demo_limiter.allow(client_ip):
-        raise HTTPException(status_code=429, detail="Too many demo accounts. Please try again later.")
+    ip = client_ip(request)
+    if not demo_limiter.allow(ip):
+        raise _too_many(demo_limiter, ip, "Too many demo accounts. Please try again later.")
 
     _remove_old_demo_users(db)
     user = models.User(

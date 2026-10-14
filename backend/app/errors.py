@@ -67,8 +67,13 @@ async def integrity_error_handler(request: Request, exc: IntegrityError) -> JSON
 
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
-    return JSONResponse(status_code=500, content=error_body(500, "Something went wrong on our side"))
+    request_id = getattr(request.state, "request_id", None)
+    logger.exception("Unhandled error on %s %s (request %s)", request.method, request.url.path, request_id)
+    body = error_body(500, "Something went wrong on our side")
+    # Lets a user quote the ID when reporting a problem, and it matches the access log line.
+    body["error"]["request_id"] = request_id
+    headers = {"X-Request-ID": request_id} if request_id else None
+    return JSONResponse(status_code=500, content=body, headers=headers)
 
 
 def register_error_handlers(app: FastAPI) -> None:

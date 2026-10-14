@@ -51,9 +51,15 @@ def clean_tables() -> Iterator[None]:
 
 @pytest.fixture(autouse=True)
 def reset_rate_limits() -> None:
-    from app.routes.auth import demo_limiter
+    from app.routes import auth
 
-    demo_limiter.reset()
+    for limiter in (
+        auth.demo_limiter,
+        auth.signup_limiter,
+        auth.failed_logins_by_email,
+        auth.failed_logins_by_ip,
+    ):
+        limiter.reset()
 
 
 @pytest.fixture
