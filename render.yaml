@@ -1,0 +1,23 @@
+# Render Blueprint for the API: New > Blueprint, then pick this repository.
+# Render asks for the values marked sync: false when the Blueprint is first created.
+services:
+  - type: web
+    name: finance-tracker-api
+    runtime: docker
+    plan: free
+    region: ohio
+    branch: master
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    buildFilter:
+      paths:
+        - backend/**
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false # Neon connection string
+      - key: CORS_ORIGINS
+        sync: false # the frontend URL, e.g. https://finance-tracker.vercel.app
+      - key: JWT_SECRET
+        generateValue: true

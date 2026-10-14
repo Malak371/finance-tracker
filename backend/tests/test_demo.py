@@ -101,3 +101,11 @@ def test_sample_statement_round_trip_flags_duplicates(client):
     assert sources["STARBUCKS #2087"] in ("history", "model")
     assert sources["ZEN FLOW YOGA STUDIO"] == "none"
     assert [s["reason"] for s in preview["skipped"]] == ["Money in (income or refund), not an expense"]
+
+
+def test_demo_accounts_cannot_log_in_with_a_password(client, db):
+    start_demo(client)
+    email = db.scalar(select(models.User.email).where(models.User.is_demo))
+    for password in ("!", "", "anything-at-all"):
+        response = client.post("/auth/login", data={"username": email, "password": password})
+        assert response.status_code in (401, 422)

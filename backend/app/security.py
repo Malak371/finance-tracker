@@ -11,11 +11,15 @@ def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds)).decode()
 
 
+# Stored instead of a hash for accounts that must never log in with a password (demo users).
+UNUSABLE_PASSWORD = "!"
+
+
 def verify_password(password: str, hashed_password: str) -> bool:
     try:
         return bcrypt.checkpw(password.encode(), hashed_password.encode())
     except ValueError:
-        # bcrypt rejects inputs over 72 bytes; such a password can never match.
+        # Inputs over 72 bytes, or UNUSABLE_PASSWORD (not a bcrypt hash), never match.
         return False
 
 

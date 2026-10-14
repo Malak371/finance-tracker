@@ -1,7 +1,9 @@
 import { Wallet } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "../api/api";
 import { Link } from "react-router-dom";
 import DemoButton from "./DemoButton";
+import SlowServerHint from "./SlowServerHint";
 import { Button, ErrorMessage, Field, inputClass } from "./ui";
 
 export default function AuthForm({
@@ -17,6 +19,11 @@ export default function AuthForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Start waking the API (free hosting sleeps when idle) while the visitor reads the page.
+  useEffect(() => {
+    api.get("/health").catch(() => {});
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -73,6 +80,7 @@ export default function AuthForm({
             <Button type="submit" loading={submitting} className="w-full">
               {submitLabel}
             </Button>
+            <SlowServerHint active={submitting} />
           </form>
           {children}
           <div className="my-6 flex items-center gap-3 text-xs text-slate-400">
