@@ -113,6 +113,15 @@ class BudgetOut(ORMModel):
     amount: MoneyOut
 
 
+class BudgetStatus(BudgetOut):
+    spent: MoneyOut
+    remaining: MoneyOut
+    percent: float
+    status: Literal["ok", "warning", "over"]
+    # Month-end spend at the current daily pace; only for the month in progress.
+    projected: MoneyOut | None
+
+
 # --- dashboard ---
 
 
