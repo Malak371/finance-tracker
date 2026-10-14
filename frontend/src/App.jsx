@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
 import Import from "./pages/Import";
 import Login from "./pages/Login";
+import Recurring from "./pages/Recurring";
 import Rules from "./pages/Rules";
 import Signup from "./pages/Signup";
 
@@ -39,6 +40,7 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="expenses" element={<Expenses />} />
           <Route path="budgets" element={<Budgets />} />
+          <Route path="recurring" element={<Recurring />} />
           <Route path="import" element={<Import />} />
           <Route path="rules" element={<Rules />} />
         </Route>
