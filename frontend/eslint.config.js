@@ -18,7 +18,8 @@ export default [
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     rules: {
-      "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]", argsIgnorePattern: "^_" }],
+      // Capitalised names are components used in JSX, which core no-unused-vars cannot see.
+      "no-unused-vars": ["error", { varsIgnorePattern: "^[A-Z_]", argsIgnorePattern: "^[A-Z_]" }],
     },
   },
   {
