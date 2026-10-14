@@ -24,6 +24,7 @@ services:
       # Local development only. Set a real secret (and never commit it) for any deployment.
       JWT_SECRET: ${JWT_SECRET:-local-development-only-secret-do-not-deploy}
       CORS_ORIGINS: http://localhost:${FRONTEND_PORT:-8080}
+      DEMO_ACCOUNTS_PER_HOUR: ${DEMO_ACCOUNTS_PER_HOUR:-5}
     ports:
       - "${API_PORT:-8000}:8000"
     depends_on:

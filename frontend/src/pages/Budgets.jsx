@@ -197,7 +197,10 @@ export default function Budgets() {
             <EmptyState
               icon={PiggyBank}
               title="No budgets yet"
-              action={<Button onClick={() => setEditing("new")}>Add your first budget</Button>}
+              action={
+                // Hidden while the form is already open above.
+                !editing && <Button onClick={() => setEditing("new")}>Add your first budget</Button>
+              }
             >
               Set a monthly limit for a category to keep spending in check.
             </EmptyState>
