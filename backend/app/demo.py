@@ -38,7 +38,14 @@ class _Month:
     def __init__(self, start: date, today: date, rng: random.Random):
         self.start, self.rng = start, rng
         in_progress = (start.year, start.month) == (today.year, today.month)
-        self.last_day = today.day if in_progress else (add_months(start, 1) - timedelta(days=1)).day
+        days_in_month = (add_months(start, 1) - timedelta(days=1)).day
+        self.last_day = today.day if in_progress else days_in_month
+        # Fraction of the month that has happened, so a month in progress isn't squeezed
+        # into its first days.
+        self.elapsed = self.last_day / days_in_month
+
+    def count(self, low: int, high: int) -> int:
+        return round(self.rng.randint(low, high) * self.elapsed)
 
     def on(self, day: int) -> date | None:
         return self.start.replace(day=day) if day <= self.last_day else None
@@ -73,7 +80,7 @@ def generate_expenses(today: date, rng: random.Random | None = None) -> list[Dem
         # Fixed monthly charges
         add(month.on(1), 1450, "MAPLE STREET APARTMENTS RENT", "Rent")
         add(month.on(3), 34.99, "PUREGYM MEMBERSHIP", "Health")
-        add(month.on(7), 17.99 if offset >= -3 else 15.49, "NETFLIX.COM", "Subscriptions")
+        add(month.on(7), 17.99 if offset >= -1 else 15.49, "NETFLIX.COM", "Subscriptions")
         add(month.on(12), 11.99, "SPOTIFY P1A2B3C4", "Subscriptions")
         add(month.on(18), 2.99, "APPLE.COM/BILL ICLOUD", "Subscriptions")
         add(month.on(20), 69.99, "XFINITY INTERNET", "Utilities")
@@ -88,25 +95,25 @@ def generate_expenses(today: date, rng: random.Random | None = None) -> list[Dem
             add(month.on(15), 7.99, "HULU 877-8244858", "Subscriptions")  # cancelled six months ago
 
         # Day-to-day spending
-        for _ in range(rng.randint(5, 7)):
+        for _ in range(month.count(5, 7)):
             name, low, high = rng.choice(GROCERS)
             add(month.random_day(), rng.uniform(low, high), name, "Groceries")
-        for _ in range(rng.randint(7, 11)):
+        for _ in range(month.count(7, 11)):
             name, low, high = rng.choice(DINING)
             add(month.random_day(), rng.uniform(low, high), name, "Dining")
-        for _ in range(rng.randint(2, 4)):
+        for _ in range(month.count(2, 4)):
             add(month.random_day(), rng.uniform(9, 32), "UBER *TRIP HELP.UBER.COM", "Transport")
-        for _ in range(2):
+        for _ in range(month.count(2, 2)):
             add(month.random_day(), rng.uniform(38, 58), "SHELL OIL 5742", "Transport")
-        for _ in range(rng.randint(1, 3)):
+        for _ in range(month.count(1, 3)):
             add(
                 month.random_day(), rng.uniform(12, 95), f"AMAZON.COM*{rng.randint(10000, 99999)}", "Shopping"
             )
-        if rng.random() < 0.5:
+        if rng.random() < 0.5 * month.elapsed:
             add(month.random_day(), rng.uniform(20, 80), "TARGET 00012", "Shopping")
-        if rng.random() < 0.4:
+        if rng.random() < 0.4 * month.elapsed:
             add(month.random_day(), rng.uniform(14, 32), "AMC THEATRES", "Entertainment")
-        if rng.random() < 0.3:
+        if rng.random() < 0.3 * month.elapsed:
             add(month.random_day(), rng.uniform(8, 40), "CVS PHARMACY #0921", "Health")
 
         # One-off events
@@ -117,11 +124,12 @@ def generate_expenses(today: date, rng: random.Random | None = None) -> list[Dem
             add(month.on(14), 64.00, "ETSY GIFT ORDER", "Gifts")
             add(month.on(16), 120.00, "BEST BUY 00321", "Gifts")
 
-        # Make sure the month in progress has something to look at from day one.
+        # The month in progress always has something to look at, including events that show
+        # off the insights: an unusually large purchase and a first visit somewhere new.
         if offset == 0:
             add(month.on(1), 23.40, "STARBUCKS #1234", "Dining")
-            add(month.on(1), 64.50, "LUIGI'S TRATTORIA", "Dining")
-            add(month.on(1), 89.99, "AMAZON.COM*48213", "Shopping")
+            add(month.on(1), 389.99, "BEST BUY 00321", "Shopping")
+            add(month.on(1), 22.00, "BOULDER CLIMBING DAY PASS", "Health")
 
     return sorted(expenses, key=lambda e: e.date)
 
