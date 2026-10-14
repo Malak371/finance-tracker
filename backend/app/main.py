@@ -1,10 +1,9 @@
 from fastapi import FastAPI
-from app import models, database
+
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import auth, expenses, dashboard, budgets, trends
 from app.config import get_settings
 
-models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
 
