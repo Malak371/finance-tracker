@@ -22,7 +22,7 @@ export default function Home() {
     const fetchExpenses = async (category = selectedCategory) => {
     const categoryParam = category ? `?category=${category}` : "";
     try {
-      const res = await api.get(`/expenses/${categoryParam}`);
+      const res = await api.get(`/expenses${categoryParam}`);
       setExpenses(res.data);
     } catch (err) {
       console.error("Failed to fetch expenses:", err);
@@ -40,7 +40,7 @@ export default function Home() {
 
   const fetchBudgets = async () => {
     try {
-      const res = await api.get("/budgets/");
+      const res = await api.get("/budgets");
       setBudgets(res.data);
     } catch (err) {
       console.error("Failed to fetch budgets:", err);

@@ -1,5 +1,5 @@
 import {useState} from "react";
-import api from "../api/api";
+import api, { errorMessage } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import {useAuth} from "../context/AuthContext";
 
@@ -19,7 +19,7 @@ export default function Login() {
             login(res.data.access_token);
             navigate("/");
         } catch (err) {
-            alert(err.response?.data?.detail || "Error logging in");
+            alert(errorMessage(err));
         }
     };
 

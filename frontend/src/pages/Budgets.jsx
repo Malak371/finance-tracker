@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import api from "../api/api";
+import api, { errorMessage } from "../api/api";
 import {useAuth} from "../context/AuthContext";
 
 export default function Budgets({refresh}) {
@@ -12,7 +12,7 @@ export default function Budgets({refresh}) {
     useEffect(() => {
     const fetchBudgets = async () => {
       try {
-        const res = await api.get("/budgets/");
+        const res = await api.get("/budgets");
         setBudgets(res.data);
       } catch (err) {
         console.error(err);
@@ -32,7 +32,7 @@ export default function Budgets({refresh}) {
         setBudgets(budgets.map(b => (b.id === editingId ? res.data : b)));
         setEditingId(null);
       } else {
-        const res = await api.post("/budgets/", {
+        const res = await api.post("/budgets", {
           category,
           amount: parseFloat(amount),
         });
@@ -42,7 +42,7 @@ export default function Budgets({refresh}) {
       setAmount("");
       refresh();
     } catch (err) {
-      if (err.response?.data?.detail) alert(err.response.data.detail);
+      alert(errorMessage(err));
       console.error(err);
     }
   };

@@ -1,5 +1,5 @@
 import {useState} from "react";
-import api from "../api/api";
+import api, { errorMessage } from "../api/api";
 
 export default function ExpenseForm({refresh, refreshSummary}) {
     const [amount, setAmount] = useState("");
@@ -10,12 +10,12 @@ export default function ExpenseForm({refresh, refreshSummary}) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.post("/expenses/", {amount, category, date, description});
+            await api.post("/expenses", {amount, category, date, description});
             setAmount(""); setCategory(""); setDate(""); setDescription("");
             refresh();
             refreshSummary();
         } catch (err) {
-            alert(err.response.data.detail || "Error adding expense");
+            alert(errorMessage(err));
         }
     };
 

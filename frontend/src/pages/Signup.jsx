@@ -1,5 +1,5 @@
 import {useState} from "react";
-import api from "../api/api";
+import api, { errorMessage } from "../api/api";
 import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
@@ -13,7 +13,7 @@ export default function Signup() {
             await api.post("/auth/signup", {email, password});
             navigate("/login");
         } catch (err) {
-            alert(err.response.data.detail || "Error signing up");
+            alert(errorMessage(err));
         }
     };
 
