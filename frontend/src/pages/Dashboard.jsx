@@ -32,15 +32,16 @@ function StatCard({ label, value, children }) {
   );
 }
 
-function MonthOverMonth({ current, previous }) {
-  if (!previous) return <span className="text-slate-500">No spending last month</span>;
+function MonthOverMonth({ current, previous, comparison }) {
+  const baseline = comparison === "month_to_date" ? "this point last month" : "last month";
+  if (!previous) return <span className="text-slate-500">No spending by {baseline}</span>;
   const change = ((current - previous) / previous) * 100;
   const up = change > 0;
   const Icon = up ? ArrowUpRight : ArrowDownRight;
   return (
     <span className={`inline-flex items-center gap-1 ${up ? "text-red-600" : "text-emerald-600"}`}>
       <Icon className="size-4" aria-hidden />
-      {Math.abs(change).toFixed(0)}% {up ? "more" : "less"} than last month
+      {Math.abs(change).toFixed(0)}% {up ? "more" : "less"} than {baseline}
     </span>
   );
 }
@@ -78,6 +79,7 @@ export default function Dashboard() {
               <MonthOverMonth
                 current={summary.data.total_spent}
                 previous={summary.data.previous_month_total}
+                comparison={summary.data.comparison}
               />
             </StatCard>
             <StatCard label="Transactions" value={summary.data.transaction_count} />

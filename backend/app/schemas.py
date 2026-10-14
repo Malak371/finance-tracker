@@ -141,6 +141,7 @@ class DashboardSummary(BaseModel):
     month: str
     total_spent: MoneyOut
     previous_month_total: MoneyOut
+    comparison: Literal["full_month", "month_to_date"]
     transaction_count: int
     by_category: list[CategoryTotal]
 
