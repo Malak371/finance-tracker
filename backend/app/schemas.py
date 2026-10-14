@@ -10,7 +10,7 @@ class UserOut(BaseModel):
     id: int
     email: EmailStr
     class Config:
-        orm_mode = True
+        from_attributes = True
         
 class Token(BaseModel):
     access_token: str
@@ -29,7 +29,7 @@ class ExpenseOut(BaseModel):
     date: date
     description: Optional[str] 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class DashboardSummary(BaseModel):
     total_spent: float
@@ -42,4 +42,4 @@ class BudgetCreate(BaseModel):
 class BudgetOut(BudgetCreate):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True

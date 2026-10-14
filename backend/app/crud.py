@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-from app import models, schemas, auth
+from app import models, schemas, security
 
 def create_user(db: Session, user: schemas.UserCreate):
-    hashed_pw = auth.hash_password(user.password)
+    hashed_pw = security.hash_password(user.password)
     db_user = models.User(email=user.email, hashed_password=hashed_pw)
     db.add(db_user)
     db.commit()
@@ -13,7 +13,7 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 def create_expense(db: Session, user_id: int, expense: schemas.ExpenseCreate):
-    db_expense = models.Expense(**expense.dict(), user_id=user_id)
+    db_expense = models.Expense(**expense.model_dump(), user_id=user_id)
     db.add(db_expense)
     db.commit()
     db.refresh(db_expense)

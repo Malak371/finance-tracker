@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from app import models, database
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import auth, expenses, dashboard, budgets, trends
+from app.config import get_settings
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -9,10 +10,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], 
-    allow_credentials=True,
+    allow_origins=get_settings().cors_origin_list,
     allow_methods=["*"],
-    allow_headers=["*"], 
+    allow_headers=["*"],
 )
 
 app.include_router(auth.router)

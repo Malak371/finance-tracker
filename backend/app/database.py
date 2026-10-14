@@ -1,12 +1,20 @@
+from collections.abc import Iterator
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from app.config import DATABASE_URL
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+from app.config import get_settings
 
-def get_db():
+# pool_pre_ping recovers from connections dropped by serverless Postgres (e.g. Neon auto-suspend).
+engine = create_engine(get_settings().database_url, pool_pre_ping=True)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+def get_db() -> Iterator[Session]:
     db = SessionLocal()
     try:
         yield db
