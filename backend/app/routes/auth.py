@@ -65,7 +65,7 @@ def start_demo(request: Request, db: DB):
     """Create a private, pre-filled demo account and log straight into it.
 
     Every visitor gets their own copy, so nobody sees anyone else's changes. Demo accounts
-    have an unusable random password and are deleted after 24 hours.
+    cannot log in with a password and are deleted after 24 hours.
     """
     client_ip = request.client.host if request.client else "unknown"
     if not demo_limiter.allow(client_ip):
@@ -74,7 +74,9 @@ def start_demo(request: Request, db: DB):
     _remove_old_demo_users(db)
     user = models.User(
         email=f"demo-{secrets.token_hex(6)}@demo.invalid",
-        hashed_password=security.hash_password(secrets.token_urlsafe(32)),
+        # Demo accounts are entered only through this endpoint; skip bcrypt, which takes
+        # seconds on a small free-tier CPU, for a password nobody could use anyway.
+        hashed_password=security.UNUSABLE_PASSWORD,
         is_demo=True,
     )
     db.add(user)
