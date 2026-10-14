@@ -36,3 +36,28 @@ def test_invalid_month_rejected(client, alice):
     response = client.get("/dashboard/summary", params={"month": "2026-13"}, headers=alice)
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "validation_error"
+
+
+def test_trends_fill_empty_months_and_filter_by_category(client, alice):
+    add(client, alice, 100, "Rent", "2025-12-01")
+    add(client, alice, 20, "Food", "2026-01-15")
+    add(client, alice, 30, "food", "2026-03-02")
+    add(client, alice, 999, "Food", "2026-04-01")  # after the window
+
+    trends = client.get("/dashboard/trends", params={"month": "2026-03", "months": 4}, headers=alice).json()
+    assert trends == [
+        {"month": "2025-12", "total": 100},
+        {"month": "2026-01", "total": 20},
+        {"month": "2026-02", "total": 0},
+        {"month": "2026-03", "total": 30},
+    ]
+
+    food = client.get(
+        "/dashboard/trends", params={"month": "2026-03", "months": 4, "category": "FOOD"}, headers=alice
+    ).json()
+    assert [m["total"] for m in food] == [0, 20, 0, 30]
+
+
+def test_trends_months_is_bounded(client, alice):
+    assert client.get("/dashboard/trends", params={"months": 0}, headers=alice).status_code == 422
+    assert client.get("/dashboard/trends", params={"months": 37}, headers=alice).status_code == 422

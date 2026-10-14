@@ -131,6 +131,11 @@ class CategoryTotal(BaseModel):
     count: int
 
 
+class MonthTotal(BaseModel):
+    month: str
+    total: MoneyOut
+
+
 class DashboardSummary(BaseModel):
     month: str
     total_spent: MoneyOut

@@ -1,4 +1,5 @@
 import { ArrowDownRight, ArrowUpRight, PieChart, Plus } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import BudgetAlerts from "../components/BudgetAlerts";
 import BudgetProgress from "../components/BudgetProgress";
@@ -6,6 +7,7 @@ import CategoryBreakdown from "../components/CategoryBreakdown";
 import DailySpendingChart from "../components/DailySpendingChart";
 import ExpenseList from "../components/ExpenseList";
 import MonthPicker from "../components/MonthPicker";
+import MonthlyTrendChart from "../components/MonthlyTrendChart";
 import {
   Card,
   CardTitle,
@@ -45,6 +47,7 @@ function MonthOverMonth({ current, previous }) {
 
 export default function Dashboard() {
   const [month, setMonth] = useMonthParam();
+  const [trendCategory, setTrendCategory] = useState("");
   const summary = useApi("/dashboard/summary", { month });
   const expenses = useApi("/expenses", monthRange(month));
   const budgets = useApi("/budgets/status", { month });
@@ -86,6 +89,15 @@ export default function Dashboard() {
               )}
             </StatCard>
           </div>
+
+          <Card>
+            <MonthlyTrendChart
+              month={month}
+              category={trendCategory}
+              onCategoryChange={setTrendCategory}
+              onSelectMonth={setMonth}
+            />
+          </Card>
 
           {summary.data.transaction_count === 0 ? (
             <Card>
