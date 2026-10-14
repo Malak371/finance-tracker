@@ -19,7 +19,8 @@ export function errorMessage(err, fallback = "Something went wrong. Please try a
     return error.details.map((d) => `${d.field}: ${d.message}`).join("\n");
   }
   if (error?.message) return error.message;
-  if (err?.request && !err.response) return "Can't reach the server. Check your connection and try again.";
+  if (err?.request && !err.response)
+    return "Can't reach the server. Check your connection and try again.";
   return fallback;
 }
 

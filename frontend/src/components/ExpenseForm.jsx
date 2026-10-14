@@ -1,26 +1,29 @@
-import {useState} from "react";
+import { useState } from "react";
 import api, { errorMessage } from "../api/api";
 
-export default function ExpenseForm({refresh, refreshSummary}) {
-    const [amount, setAmount] = useState("");
-    const [category, setCategory] = useState("");
-    const [date, setDate] = useState("");
-    const [description, setDescription] = useState("");
+export default function ExpenseForm({ refresh, refreshSummary }) {
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
+  const [date, setDate] = useState("");
+  const [description, setDescription] = useState("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await api.post("/expenses", {amount, category, date, description});
-            setAmount(""); setCategory(""); setDate(""); setDescription("");
-            refresh();
-            refreshSummary();
-        } catch (err) {
-            alert(errorMessage(err));
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post("/expenses", { amount, category, date, description });
+      setAmount("");
+      setCategory("");
+      setDate("");
+      setDescription("");
+      refresh();
+      refreshSummary();
+    } catch (err) {
+      alert(errorMessage(err));
+    }
+  };
 
-    return (
-        <form
+  return (
+    <form
       onSubmit={handleSubmit}
       className="mb-8 rounded-2xl bg-gray-800 p-6 shadow-lg shadow-cyan-500/50"
     >
@@ -67,5 +70,5 @@ export default function ExpenseForm({refresh, refreshSummary}) {
         Add
       </button>
     </form>
-    );
+  );
 }

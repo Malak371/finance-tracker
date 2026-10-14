@@ -5,4 +5,9 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: { port: 5173 },
+  test: {
+    environment: "jsdom",
+    setupFiles: "./src/test/setup.js",
+    css: false,
+  },
 });

@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import api from "../api/api";
 
 export default function ExpenseList({ expenses, refresh }) {
@@ -6,23 +6,23 @@ export default function ExpenseList({ expenses, refresh }) {
   const [editData, setEditData] = useState({ category: "", amount: 0, date: "", description: "" });
 
   const handleExport = async () => {
-  try {
-    const res = await api.get("/expenses/export", {
-      responseType: "blob",
-    });
+    try {
+      const res = await api.get("/expenses/export", {
+        responseType: "blob",
+      });
 
-    const url = window.URL.createObjectURL(new Blob([res.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "expenses.csv");
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } catch (err) {
-    console.error("Export failed:", err);
-  }
-};
-const startEdit = (expense) => {
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "expenses.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Export failed:", err);
+    }
+  };
+  const startEdit = (expense) => {
     setEditingId(expense.id);
     setEditData({
       category: expense.category,
@@ -83,7 +83,9 @@ const startEdit = (expense) => {
                 <input
                   type="number"
                   value={editData.amount}
-                  onChange={(ev) => setEditData({ ...editData, amount: parseFloat(ev.target.value) })}
+                  onChange={(ev) =>
+                    setEditData({ ...editData, amount: parseFloat(ev.target.value) })
+                  }
                   className="p-1 rounded text-black"
                 />
                 <input
@@ -100,8 +102,12 @@ const startEdit = (expense) => {
                   placeholder="Description"
                 />
                 <div className="flex gap-2">
-                  <button onClick={() => saveEdit(e.id)} className="bg-blue-600 px-2 rounded">Save</button>
-                  <button onClick={cancelEdit} className="bg-gray-500 px-2 rounded">Cancel</button>
+                  <button onClick={() => saveEdit(e.id)} className="bg-blue-600 px-2 rounded">
+                    Save
+                  </button>
+                  <button onClick={cancelEdit} className="bg-gray-500 px-2 rounded">
+                    Cancel
+                  </button>
                 </div>
               </div>
             ) : (
@@ -114,8 +120,12 @@ const startEdit = (expense) => {
                   {e.date} {e.description && `— ${e.description}`}
                 </div>
                 <div className="flex gap-2 mt-2">
-                  <button onClick={() => startEdit(e)} className="bg-yellow-500 px-2 rounded">Edit</button>
-                  <button onClick={() => handleDelete(e.id)} className="bg-red-500 px-2 rounded">Delete</button>
+                  <button onClick={() => startEdit(e)} className="bg-yellow-500 px-2 rounded">
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(e.id)} className="bg-red-500 px-2 rounded">
+                    Delete
+                  </button>
                 </div>
               </>
             )}
@@ -124,5 +134,4 @@ const startEdit = (expense) => {
       </ul>
     </div>
   );
-
 }

@@ -1,15 +1,15 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import api, { errorMessage } from "../api/api";
-import {useAuth} from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
-export default function Budgets({refresh}) {
-    const {token} = useAuth();
-    const [budgets, setBudgets] = useState([]);
-    const [category, setCategory] = useState("");
-    const [amount, setAmount] = useState("");
-    const [editingId, setEditingId] = useState(null);
+export default function Budgets({ refresh }) {
+  const { token } = useAuth();
+  const [budgets, setBudgets] = useState([]);
+  const [category, setCategory] = useState("");
+  const [amount, setAmount] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchBudgets = async () => {
       try {
         const res = await api.get("/budgets");
@@ -21,7 +21,7 @@ export default function Budgets({refresh}) {
     fetchBudgets();
   }, [token]);
 
-    const handleAdd = async (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
     try {
       if (editingId) {
@@ -29,7 +29,7 @@ export default function Budgets({refresh}) {
           category,
           amount: parseFloat(amount),
         });
-        setBudgets(budgets.map(b => (b.id === editingId ? res.data : b)));
+        setBudgets(budgets.map((b) => (b.id === editingId ? res.data : b)));
         setEditingId(null);
       } else {
         const res = await api.post("/budgets", {
@@ -57,15 +57,15 @@ export default function Budgets({refresh}) {
     if (!window.confirm("Are you sure you want to delete this budget?")) return;
     try {
       await api.delete(`/budgets/${id}`);
-      setBudgets(budgets.filter(b => b.id !== id));
+      setBudgets(budgets.filter((b) => b.id !== id));
       refresh();
     } catch (err) {
       console.error(err);
     }
   };
 
-    return (
-        <div>
+  return (
+    <div>
       <h1 className="text-2xl font-bold mb-4">Budgets</h1>
       <form className="mb-6 flex gap-2" onSubmit={handleAdd}>
         <input
@@ -90,7 +90,11 @@ export default function Budgets({refresh}) {
         {editingId && (
           <button
             type="button"
-            onClick={() => { setEditingId(null); setCategory(""); setAmount(""); }}
+            onClick={() => {
+              setEditingId(null);
+              setCategory("");
+              setAmount("");
+            }}
             className="bg-gray-500 text-white px-4 rounded hover:bg-gray-600"
           >
             Cancel
@@ -104,12 +108,16 @@ export default function Budgets({refresh}) {
             <span>{b.category}</span>
             <span>${b.amount}</span>
             <div className="flex gap-2">
-              <button onClick={() => handleEdit(b)} className="bg-yellow-500 px-2 rounded">Edit</button>
-              <button onClick={() => handleDelete(b.id)} className="bg-red-500 px-2 rounded">Delete</button>
+              <button onClick={() => handleEdit(b)} className="bg-yellow-500 px-2 rounded">
+                Edit
+              </button>
+              <button onClick={() => handleDelete(b.id)} className="bg-red-500 px-2 rounded">
+                Delete
+              </button>
             </div>
           </div>
         ))}
       </div>
     </div>
-    );
+  );
 }

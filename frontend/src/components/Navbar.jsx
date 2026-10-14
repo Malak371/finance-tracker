@@ -1,17 +1,17 @@
-import {Link, useNavigate} from "react-router-dom";
-import {useAuth} from "../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-    const {token, logout} = useAuth();
-    const navigate = useNavigate();
+  const { token, logout } = useAuth();
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
-    };
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
-    return (
-        <nav className="flex items-center justify-between bg-gray-900 px-6 py-4 shadow-lg shadow-cyan-500/30">
+  return (
+    <nav className="flex items-center justify-between bg-gray-900 px-6 py-4 shadow-lg shadow-cyan-500/30">
       <Link
         to="/"
         className="text-cyan-400 text-xl font-bold hover:text-cyan-300 transition-colors"
@@ -22,16 +22,10 @@ export default function Navbar() {
       <div className="flex items-center space-x-6">
         {!token && (
           <>
-            <Link
-              to="/signup"
-              className="text-gray-300 hover:text-cyan-400 transition-colors"
-            >
+            <Link to="/signup" className="text-gray-300 hover:text-cyan-400 transition-colors">
               Signup
             </Link>
-            <Link
-              to="/login"
-              className="text-gray-300 hover:text-cyan-400 transition-colors"
-            >
+            <Link to="/login" className="text-gray-300 hover:text-cyan-400 transition-colors">
               Login
             </Link>
           </>
@@ -47,5 +41,5 @@ export default function Navbar() {
         )}
       </div>
     </nav>
-    );
+  );
 }

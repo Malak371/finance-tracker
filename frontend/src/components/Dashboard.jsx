@@ -32,7 +32,9 @@ export default function Dashboard({ summary, budgets, weeklyData, monthlyData })
                 }`}
               >
                 <span>{b.category}</span>
-                <span>${spent} / ${b.amount}</span>
+                <span>
+                  ${spent} / ${b.amount}
+                </span>
               </div>
             );
           })}
