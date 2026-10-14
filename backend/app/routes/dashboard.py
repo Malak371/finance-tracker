@@ -16,5 +16,5 @@ def summary(db: DB, user: CurrentUser):
         .where(models.Expense.user_id == user.id)
         .group_by(models.Expense.category)
     ).all()
-    breakdown = {category: total for category, total in rows}
+    breakdown = dict(rows)
     return {"total_spent": sum(breakdown.values(), Decimal(0)), "breakdown": breakdown}

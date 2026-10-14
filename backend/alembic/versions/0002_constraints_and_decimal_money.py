@@ -10,6 +10,7 @@ Revises: 0001
 """
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision = "0002"
@@ -42,7 +43,9 @@ def upgrade() -> None:
     op.drop_index("ix_expenses_id", table_name="expenses")
     op.alter_column("expenses", "amount", type_=MONEY, postgresql_using="round(amount::numeric, 2)")
     op.alter_column("expenses", "category", type_=sa.String(50), postgresql_using="left(category, 50)")
-    op.alter_column("expenses", "description", type_=sa.String(255), postgresql_using="left(description, 255)")
+    op.alter_column(
+        "expenses", "description", type_=sa.String(255), postgresql_using="left(description, 255)"
+    )
     op.alter_column("expenses", "user_id", nullable=False)
     op.drop_constraint("expenses_user_id_fkey", "expenses", type_="foreignkey")
     op.create_foreign_key(
@@ -58,7 +61,9 @@ def upgrade() -> None:
     # budgets
     op.drop_index("ix_budgets_id", table_name="budgets")
     op.drop_index("ix_budgets_category", table_name="budgets")
-    op.alter_column("budgets", "amount", type_=MONEY, nullable=False, postgresql_using="round(amount::numeric, 2)")
+    op.alter_column(
+        "budgets", "amount", type_=MONEY, nullable=False, postgresql_using="round(amount::numeric, 2)"
+    )
     op.alter_column(
         "budgets", "category", type_=sa.String(50), nullable=False, postgresql_using="left(category, 50)"
     )

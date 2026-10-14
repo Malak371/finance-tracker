@@ -5,7 +5,7 @@ and filters on `user_id`. `get_owned_or_404` is the only way routes load a singl
 row by id, so another user's id is indistinguishable from one that doesn't exist.
 """
 
-from typing import Annotated, TypeVar
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -34,10 +34,10 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: DB) -> m
 
 CurrentUser = Annotated[models.User, Depends(get_current_user)]
 
-OwnedModel = TypeVar("OwnedModel", models.Expense, models.Budget)
 
-
-def get_owned_or_404(db: Session, model: type[OwnedModel], row_id: int, user: models.User) -> OwnedModel:
+def get_owned_or_404[OwnedModel: (models.Expense, models.Budget)](
+    db: Session, model: type[OwnedModel], row_id: int, user: models.User
+) -> OwnedModel:
     row = db.scalar(select(model).where(model.id == row_id, model.user_id == user.id))
     if row is None:
         raise HTTPException(status_code=404, detail=f"{model.__name__} not found")

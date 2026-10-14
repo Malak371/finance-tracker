@@ -28,9 +28,7 @@ def _check_not_blank(value: str) -> str:
     return value
 
 
-Category = Annotated[
-    str, AfterValidator(_clean_text), AfterValidator(_check_not_blank), Field(max_length=50)
-]
+Category = Annotated[str, AfterValidator(_clean_text), AfterValidator(_check_not_blank), Field(max_length=50)]
 Description = Annotated[str, AfterValidator(_clean_text), Field(max_length=255)]
 
 EARLIEST_DATE = date(2000, 1, 1)
