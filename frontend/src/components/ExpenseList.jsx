@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Sparkles, Trash2 } from "lucide-react";
 import { useCategories } from "../context/CategoriesContext";
 import { formatDate, formatMoney } from "../lib/format";
 
@@ -16,6 +16,8 @@ export function CategoryBadge({ category }) {
   );
 }
 
+const AUTO_SOURCES = new Set(["rule", "history", "model", "default"]);
+
 export default function ExpenseList({ expenses, onEdit, onDelete }) {
   return (
     <ul className="divide-y divide-slate-100">
@@ -28,6 +30,14 @@ export default function ExpenseList({ expenses, onEdit, onDelete }) {
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
               <time dateTime={expense.date}>{formatDate(expense.date)}</time>
               <CategoryBadge category={expense.category} />
+              {AUTO_SOURCES.has(expense.category_source) && (
+                <span title="Categorised automatically. Edit to correct it and the categoriser learns.">
+                  <Sparkles
+                    className="size-3.5 text-violet-500"
+                    aria-label="Categorised automatically"
+                  />
+                </span>
+              )}
             </div>
           </div>
           <p className="text-sm font-semibold whitespace-nowrap text-slate-900 tabular-nums">

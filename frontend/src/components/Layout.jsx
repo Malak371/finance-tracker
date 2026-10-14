@@ -1,4 +1,12 @@
-import { LayoutDashboard, LogOut, PiggyBank, ReceiptText, Wallet } from "lucide-react";
+import {
+  FileUp,
+  LayoutDashboard,
+  LogOut,
+  PiggyBank,
+  ReceiptText,
+  Tags,
+  Wallet,
+} from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { CategoriesProvider } from "../context/CategoriesContext";
@@ -7,6 +15,8 @@ const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/expenses", label: "Expenses", icon: ReceiptText },
   { to: "/budgets", label: "Budgets", icon: PiggyBank },
+  { to: "/import", label: "Import", icon: FileUp },
+  { to: "/rules", label: "Rules", icon: Tags },
 ];
 
 function navClass({ isActive }) {

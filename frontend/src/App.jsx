@@ -4,7 +4,9 @@ import { GuestRoute, ProtectedRoute } from "./components/ProtectedRoute";
 import Budgets from "./pages/Budgets";
 import Dashboard from "./pages/Dashboard";
 import Expenses from "./pages/Expenses";
+import Import from "./pages/Import";
 import Login from "./pages/Login";
+import Rules from "./pages/Rules";
 import Signup from "./pages/Signup";
 
 export default function App() {
@@ -37,6 +39,8 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="expenses" element={<Expenses />} />
           <Route path="budgets" element={<Budgets />} />
+          <Route path="import" element={<Import />} />
+          <Route path="rules" element={<Rules />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
