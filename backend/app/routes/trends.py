@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.database import get_db
 from app import models
+from .auth import get_current_user
 from sqlalchemy import func
 
 router = APIRouter(prefix="/expenses/trends", tags=["Trends"])
@@ -18,12 +19,12 @@ def get_start_dates(period: str):
     return start
 
 @router.get("/weekly")
-def weekly_trends(category: str | None = Query(None), db: Session = Depends(get_db)):
+def weekly_trends(category: str | None = Query(None), db: Session = Depends(get_db), user=Depends(get_current_user)):
     start = get_start_dates("weekly")
     query = db.query(
         func.date(models.Expense.date).label("date"),
         func.sum(models.Expense.amount).label("total")
-    ).filter(models.Expense.date >= start)
+    ).filter(models.Expense.user_id == user.id, models.Expense.date >= start)
     
     if category:
         query = query.filter(models.Expense.category == category)
@@ -32,12 +33,12 @@ def weekly_trends(category: str | None = Query(None), db: Session = Depends(get_
     return [{"date": str(r.date), "total": float(r.total)} for r in results]
 
 @router.get("/monthly")
-def weekly_trends(category: str | None = Query(None), db: Session = Depends(get_db)):
+def monthly_trends(category: str | None = Query(None), db: Session = Depends(get_db), user=Depends(get_current_user)):
     start = get_start_dates("monthly")
     query = db.query(
         func.date(models.Expense.date).label("date"),
         func.sum(models.Expense.amount).label("total")
-    ).filter(models.Expense.date >= start)
+    ).filter(models.Expense.user_id == user.id, models.Expense.date >= start)
     
     if category:
         query = query.filter(models.Expense.category == category)
