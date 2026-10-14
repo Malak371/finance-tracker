@@ -33,7 +33,7 @@ class Expense(Base):
     date: Mapped[date] = mapped_column(Date, index=True)
     description: Mapped[str | None] = mapped_column(String(255))
     # Where the category came from: "manual" (chosen by the user), "file" (bank export),
-    # "rule", "model" or "default" (auto-categorised), or "none" (Uncategorized).
+    # "rule", "history", "model" or "default" (auto-categorised), or "none" (Uncategorized).
     category_source: Mapped[str] = mapped_column(String(20), server_default="manual")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

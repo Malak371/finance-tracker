@@ -177,7 +177,7 @@ class PreviewResponse(BaseModel):
     skipped: list[SkippedRow]
 
 
-CategorySource = Literal["manual", "file", "rule", "model", "default", "none"]
+CategorySource = Literal["manual", "file", "rule", "history", "model", "default", "none"]
 
 
 class ImportTransaction(ExpenseIn):

@@ -3,11 +3,12 @@
 The pipeline for one description, first match wins:
 
 1. The user's own keyword rules ("TESCO" -> Groceries). Explicit, so they always win.
-2. A Naive Bayes classifier trained only on this user's expenses whose category *they* chose
+2. History: the same merchant (same words, ignoring numbers) that the user categorised before.
+3. A Naive Bayes classifier trained only on this user's expenses whose category *they* chose
    (typed by hand, corrected later, or taken from their bank's export). It only answers when it
    is confident, and it never learns from its own guesses, which would reinforce mistakes.
-3. Built-in keywords for well-known merchants, as a generic fallback.
-4. Otherwise "Uncategorized".
+4. Built-in keywords for well-known merchants, as a generic fallback.
+5. Otherwise "Uncategorized".
 """
 
 import math
@@ -125,18 +126,28 @@ class NaiveBayesClassifier:
 @dataclass
 class Suggestion:
     category: str
-    source: str  # "rule", "model", "default" or "none"
+    source: str  # "rule", "history", "model", "default" or "none"
     confidence: float | None = None
+
+
+def merchant_key(description: str) -> str:
+    return " ".join(tokenize(description))
 
 
 class Categorizer:
     def __init__(self, user_rules: dict[str, str], training_examples: Iterable[tuple[str, str]]):
+        """`training_examples` are (description, category) pairs labelled by the user, oldest first."""
+        examples = list(training_examples)
         self.user_rules = user_rules
-        self.model = NaiveBayesClassifier(training_examples)
+        # Later examples overwrite earlier ones, so the user's most recent choice wins.
+        self.history = {merchant_key(d): c for d, c in examples if merchant_key(d)}
+        self.model = NaiveBayesClassifier(examples)
 
     def suggest(self, description: str) -> Suggestion:
         if category := match_keyword(description, self.user_rules):
             return Suggestion(category, "rule")
+        if category := self.history.get(merchant_key(description)):
+            return Suggestion(category, "history")
         if prediction := self.model.predict(description):
             category, confidence = prediction
             if confidence >= MIN_CONFIDENCE:

@@ -81,11 +81,13 @@ def load_categorizer(db: Session, user: models.User) -> categorization.Categoriz
         )
     ).all()
     training = db.execute(
-        select(models.Expense.description, models.Expense.category).where(
+        select(models.Expense.description, models.Expense.category)
+        .where(
             models.Expense.user_id == user.id,
             models.Expense.description.is_not(None),
             models.Expense.category_source.in_(categorization.USER_LABELLED_SOURCES),
             models.Expense.category != categorization.UNCATEGORIZED,
         )
+        .order_by(models.Expense.created_at, models.Expense.id)
     ).all()
     return categorization.Categorizer(dict(rules), training)

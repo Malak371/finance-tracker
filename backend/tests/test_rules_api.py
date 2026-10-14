@@ -114,3 +114,9 @@ def test_rules_are_private(client, alice, bob):
 def test_defaults_are_listed(client, alice):
     defaults = client.get("/rules/defaults", headers=alice).json()
     assert {"keyword": "netflix", "category": "Subscriptions"} in defaults
+
+
+def test_a_merchant_categorised_once_is_remembered(client, alice):
+    import_rows(client, alice, [("ZEPHYR BOOKSHOP 0001", "Books", "manual")])
+    row = preview_one(client, alice, "ZEPHYR BOOKSHOP 0042")
+    assert (row["category"], row["category_source"]) == ("Books", "history")

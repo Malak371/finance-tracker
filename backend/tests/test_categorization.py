@@ -38,6 +38,13 @@ def test_classifier_predicts_from_learned_words():
     assert model.predict("Completely unknown merchant") is None
 
 
+def test_history_remembers_the_latest_choice_for_a_merchant():
+    categorizer = Categorizer({}, [("ZEPHYR BOOKSHOP 001", "Gifts"), ("Zephyr Bookshop 002", "Books")])
+    suggestion = categorizer.suggest("ZEPHYR BOOKSHOP 777")
+    assert (suggestion.category, suggestion.source) == ("Books", "history")
+    assert categorizer.suggest("ZEPHYR TOOLS").source == "none"
+
+
 def test_pipeline_order_rule_then_model_then_default():
     training = [("Corner Books", "Hobbies")] * 6 + [("Amazon Marketplace books", "Hobbies")] * 6
     training += [("Tesco Stores", "Groceries")] * 6

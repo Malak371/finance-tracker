@@ -7,7 +7,7 @@ from app.deps import DB, CurrentUser, canonical_category, get_owned_or_404
 router = APIRouter(prefix="/rules", tags=["categorisation rules"])
 
 # Expenses a new rule may re-categorise: never ones the user or their bank labelled.
-OVERRIDABLE_SOURCES = ("none", "default", "model")
+OVERRIDABLE_SOURCES = ("none", "default", "model", "history")
 
 
 def _ensure_unique_keyword(db: DB, user: models.User, keyword: str, exclude_id: int | None = None) -> None:
