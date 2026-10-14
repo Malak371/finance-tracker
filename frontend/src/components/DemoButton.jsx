@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import SlowServerHint from "./SlowServerHint";
 import { Button, ErrorMessage } from "./ui";
 
 export default function DemoButton() {
@@ -30,6 +31,7 @@ export default function DemoButton() {
         {!loading && <Sparkles className="size-4 text-emerald-600" aria-hidden />}
         {loading ? "Setting up your demo…" : "Try the demo, no sign-up"}
       </Button>
+      <SlowServerHint active={loading} />
       <ErrorMessage error={error} />
     </div>
   );

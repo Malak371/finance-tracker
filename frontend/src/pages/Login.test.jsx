@@ -7,7 +7,10 @@ import Login from "./Login";
 
 vi.mock("../api/api", async (importOriginal) => {
   const actual = await importOriginal();
-  return { ...actual, default: { ...actual.default, post: vi.fn() } };
+  return {
+    ...actual,
+    default: { ...actual.default, post: vi.fn(), get: vi.fn(() => Promise.resolve({ data: {} })) },
+  };
 });
 
 describe("Login", () => {
@@ -42,6 +45,11 @@ describe("Login", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Incorrect email or password");
     expect(localStorage.getItem("token")).toBeNull();
+  });
+
+  it("starts waking the API as soon as the page opens", () => {
+    renderAt(<Login />, { path: "/login" });
+    expect(api.get).toHaveBeenCalledWith("/health");
   });
 
   it("offers a one-click demo", async () => {

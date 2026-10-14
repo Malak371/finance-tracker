@@ -1,5 +1,6 @@
 import { AlertCircle, Loader2 } from "lucide-react";
 import { errorMessage } from "../api/api";
+import SlowServerHint from "./SlowServerHint";
 
 const BUTTON_VARIANTS = {
   primary: "bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:outline-emerald-600",
@@ -63,12 +64,12 @@ export function PageHeader({ title, description, actions }) {
 
 export function LoadingState({ label = "Loading…" }) {
   return (
-    <div
-      role="status"
-      className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500"
-    >
-      <Loader2 className="size-5 animate-spin" aria-hidden />
-      {label}
+    <div className="space-y-2 py-12">
+      <div role="status" className="flex items-center justify-center gap-2 text-sm text-slate-500">
+        <Loader2 className="size-5 animate-spin" aria-hidden />
+        {label}
+      </div>
+      <SlowServerHint active />
     </div>
   );
 }
