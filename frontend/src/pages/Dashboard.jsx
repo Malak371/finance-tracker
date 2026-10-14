@@ -1,5 +1,7 @@
 import { ArrowDownRight, ArrowUpRight, PieChart, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import BudgetAlerts from "../components/BudgetAlerts";
+import BudgetProgress from "../components/BudgetProgress";
 import CategoryBreakdown from "../components/CategoryBreakdown";
 import DailySpendingChart from "../components/DailySpendingChart";
 import ExpenseList from "../components/ExpenseList";
@@ -45,11 +47,13 @@ export default function Dashboard() {
   const [month, setMonth] = useMonthParam();
   const summary = useApi("/dashboard/summary", { month });
   const expenses = useApi("/expenses", monthRange(month));
+  const budgets = useApi("/budgets/status", { month });
 
-  const error = summary.error || expenses.error;
+  const error = summary.error || expenses.error || budgets.error;
   const retry = () => {
     summary.reload();
     expenses.reload();
+    budgets.reload();
   };
 
   return (
@@ -61,10 +65,11 @@ export default function Dashboard() {
       />
       <ErrorMessage error={error} onRetry={retry} />
 
-      {summary.loading || expenses.loading ? (
+      {summary.loading || expenses.loading || budgets.loading ? (
         !error && <LoadingState />
-      ) : summary.data && expenses.data ? (
+      ) : summary.data && expenses.data && budgets.data ? (
         <div className="space-y-6">
+          <BudgetAlerts budgets={budgets.data} month={month} />
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard label="Spent this month" value={formatMoney(summary.data.total_spent)}>
               <MonthOverMonth
@@ -115,6 +120,29 @@ export default function Dashboard() {
                   <DailySpendingChart expenses={expenses.data} month={month} />
                 </Card>
               </div>
+              {budgets.data.length > 0 && (
+                <Card>
+                  <CardTitle
+                    action={
+                      <Link
+                        to={`/budgets?month=${month}`}
+                        className="text-sm font-medium text-emerald-700 hover:underline"
+                      >
+                        Manage
+                      </Link>
+                    }
+                  >
+                    Budgets
+                  </CardTitle>
+                  <ul className="divide-y divide-slate-100">
+                    {budgets.data.slice(0, 4).map((budget) => (
+                      <li key={budget.id}>
+                        <BudgetProgress budget={budget} />
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
               <Card>
                 <CardTitle
                   action={

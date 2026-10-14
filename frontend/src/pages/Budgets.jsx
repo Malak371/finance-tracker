@@ -1,7 +1,8 @@
 import { PiggyBank, Plus } from "lucide-react";
 import { useState } from "react";
 import api, { errorMessage } from "../api/api";
-import { CategoryBadge } from "../components/ExpenseList";
+import BudgetProgress from "../components/BudgetProgress";
+import MonthPicker from "../components/MonthPicker";
 import {
   Button,
   Card,
@@ -14,7 +15,8 @@ import {
 } from "../components/ui";
 import { useCategories } from "../context/CategoriesContext";
 import { useApi } from "../hooks/useApi";
-import { formatMoney } from "../lib/format";
+import { useMonthParam } from "../hooks/useMonthParam";
+import { formatMoney, formatMonth } from "../lib/format";
 
 function BudgetForm({ budget, categories, onSaved, onCancel }) {
   const [category, setCategory] = useState(budget?.category ?? "");
@@ -88,7 +90,8 @@ function BudgetForm({ budget, categories, onSaved, onCancel }) {
 }
 
 export default function Budgets() {
-  const budgets = useApi("/budgets");
+  const [month, setMonth] = useMonthParam();
+  const budgets = useApi("/budgets/status", { month });
   const categories = useCategories();
   const [editing, setEditing] = useState(null);
   const [actionError, setActionError] = useState(null);
@@ -114,12 +117,15 @@ export default function Budgets() {
     <>
       <PageHeader
         title="Budgets"
-        description="Set a monthly limit for each category."
+        description={`Monthly limits per category, tracked for ${formatMonth(month)}.`}
         actions={
-          <Button onClick={() => setEditing("new")}>
-            <Plus className="size-4" aria-hidden />
-            Add budget
-          </Button>
+          <>
+            <MonthPicker month={month} onChange={setMonth} />
+            <Button onClick={() => setEditing("new")}>
+              <Plus className="size-4" aria-hidden />
+              Add budget
+            </Button>
+          </>
         }
       />
 
@@ -149,22 +155,41 @@ export default function Budgets() {
         <Card>
           <ul className="divide-y divide-slate-100">
             {budgets.data.map((budget) => (
-              <li key={budget.id} className="flex items-center gap-3 py-3">
-                <div className="flex-1">
-                  <CategoryBadge category={budget.category} />
-                </div>
-                <span className="text-sm font-semibold text-slate-900 tabular-nums">
-                  {formatMoney(budget.amount)} / month
-                </span>
-                <Button variant="ghost" onClick={() => setEditing(budget)}>
-                  Edit
-                </Button>
-                <Button variant="danger" onClick={() => handleDelete(budget)}>
-                  Delete
-                </Button>
+              <li key={budget.id}>
+                <BudgetProgress
+                  budget={budget}
+                  actions={
+                    <>
+                      <Button
+                        variant="ghost"
+                        className="px-2 py-1"
+                        onClick={() => setEditing(budget)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="px-2 py-1 text-red-600 hover:bg-red-50 hover:text-red-700"
+                        onClick={() => handleDelete(budget)}
+                      >
+                        Delete
+                      </Button>
+                    </>
+                  }
+                />
               </li>
             ))}
           </ul>
+          <p className="mt-2 border-t border-slate-100 pt-4 text-right text-sm text-slate-500">
+            Total budgeted{" "}
+            <span className="font-semibold text-slate-900">
+              {formatMoney(budgets.data.reduce((sum, b) => sum + b.amount, 0))}
+            </span>{" "}
+            · spent{" "}
+            <span className="font-semibold text-slate-900">
+              {formatMoney(budgets.data.reduce((sum, b) => sum + b.spent, 0))}
+            </span>
+          </p>
         </Card>
       ) : (
         budgets.data && (
