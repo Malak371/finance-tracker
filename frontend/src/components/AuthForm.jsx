@@ -1,6 +1,7 @@
 import { Wallet } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import DemoButton from "./DemoButton";
 import { Button, ErrorMessage, Field, inputClass } from "./ui";
 
 export default function AuthForm({
@@ -74,6 +75,12 @@ export default function AuthForm({
             </Button>
           </form>
           {children}
+          <div className="my-6 flex items-center gap-3 text-xs text-slate-400">
+            <span className="h-px flex-1 bg-slate-200" />
+            or
+            <span className="h-px flex-1 bg-slate-200" />
+          </div>
+          <DemoButton />
         </div>
         <p className="mt-6 text-center text-sm text-slate-500">{footer}</p>
       </div>

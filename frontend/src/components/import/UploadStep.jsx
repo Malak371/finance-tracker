@@ -9,6 +9,18 @@ export default function UploadStep({ onParsed }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
 
+  const loadSample = async () => {
+    setError(null);
+    setUploading(true);
+    try {
+      const response = await api.get("/imports/sample", { responseType: "blob" });
+      await upload(new File([response.data], "sample-statement.csv", { type: "text/csv" }));
+    } catch (err) {
+      setError(err);
+      setUploading(false);
+    }
+  };
+
   const upload = async (file) => {
     if (!file) return;
     setError(null);
@@ -62,6 +74,16 @@ export default function UploadStep({ onParsed }) {
         </p>
         <p className="mt-3 text-xs text-slate-400">
           CSV exports from most banks and card providers · up to 2 MB
+        </p>
+        <p className="mt-4 text-sm text-slate-500">
+          No statement handy?{" "}
+          <button
+            type="button"
+            onClick={loadSample}
+            className="font-medium text-emerald-700 hover:underline"
+          >
+            Use a sample statement
+          </button>
         </p>
         <input
           ref={inputRef}
