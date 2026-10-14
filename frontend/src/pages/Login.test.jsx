@@ -30,7 +30,7 @@ describe("Login", () => {
     expect(url).toBe("/auth/login");
     expect(body.toString()).toBe("username=me%40example.com&password=secret-pass");
     expect(localStorage.getItem("token")).toBe("token-123");
-    expect(screen.getByTestId("current-path")).toHaveTextContent(/^\/$/);
+    expect(screen.getByTestId("current-path")).toHaveTextContent(/^\/app$/);
   });
 
   it("shows the server's message when login fails", async () => {

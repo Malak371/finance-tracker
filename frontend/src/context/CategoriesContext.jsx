@@ -23,6 +23,15 @@ export function CategoriesProvider({ children }) {
   return <CategoriesContext.Provider value={value}>{children}</CategoriesContext.Provider>;
 }
 
+// Fixed categories for previews that render app components without an API (the landing page).
+export function StaticCategoriesProvider({ categories, children }) {
+  const value = useMemo(
+    () => ({ categories, colorOf: makeColorOf(categories), reload: () => {} }),
+    [categories],
+  );
+  return <CategoriesContext.Provider value={value}>{children}</CategoriesContext.Provider>;
+}
+
 // eslint-disable-next-line react-refresh/only-export-components
 export function useCategories() {
   return useContext(CategoriesContext);

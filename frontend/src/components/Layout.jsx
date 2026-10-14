@@ -14,12 +14,12 @@ import { CategoriesProvider } from "../context/CategoriesContext";
 import DemoBanner from "./DemoBanner";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/expenses", label: "Expenses", icon: ReceiptText },
-  { to: "/budgets", label: "Budgets", icon: PiggyBank },
-  { to: "/recurring", label: "Recurring", icon: Repeat },
-  { to: "/import", label: "Import", icon: FileUp },
-  { to: "/rules", label: "Rules", icon: Tags },
+  { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/app/expenses", label: "Expenses", icon: ReceiptText },
+  { to: "/app/budgets", label: "Budgets", icon: PiggyBank },
+  { to: "/app/recurring", label: "Recurring", icon: Repeat },
+  { to: "/app/import", label: "Import", icon: FileUp },
+  { to: "/app/rules", label: "Rules", icon: Tags },
 ];
 
 function navClass({ isActive }) {
@@ -36,7 +36,7 @@ export default function Layout() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");
   };
 
   return (

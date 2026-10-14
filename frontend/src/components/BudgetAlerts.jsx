@@ -37,7 +37,7 @@ export default function BudgetAlerts({ budgets, month }) {
           ))}
         </ul>
       </div>
-      <Link to={`/budgets?month=${month}`} className="self-start text-sm font-medium underline">
+      <Link to={`/app/budgets?month=${month}`} className="self-start text-sm font-medium underline">
         Review
       </Link>
     </div>

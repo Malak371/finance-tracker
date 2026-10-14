@@ -19,7 +19,7 @@ const CADENCE_LABELS = {
   yearly: "Yearly",
 };
 
-function ChargeRow({ charge }) {
+export function ChargeRow({ charge }) {
   const priceChange = charge.previous_amount != null ? charge.amount - charge.previous_amount : 0;
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">

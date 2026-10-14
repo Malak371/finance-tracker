@@ -9,6 +9,8 @@ const BUTTON_VARIANTS = {
   danger:
     "bg-white text-red-600 ring-1 ring-inset ring-red-200 hover:bg-red-50 focus-visible:outline-red-500",
   ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-slate-400",
+  // For use on a dark (emerald) background.
+  light: "bg-white text-emerald-800 hover:bg-emerald-50 focus-visible:outline-white",
 };
 
 export function Button({
