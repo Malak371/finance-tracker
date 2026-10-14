@@ -69,9 +69,9 @@ def test_category_reuses_existing_casing(client, alice):
 def test_money_is_summed_exactly(client, alice):
     for amount in ("0.10", "0.20", "0.30"):
         add(client, alice, amount=amount)
-    summary = client.get("/dashboard/summary", headers=alice).json()
+    summary = client.get("/dashboard/summary", params={"month": "2026-01"}, headers=alice).json()
     assert summary["total_spent"] == 0.6
-    assert summary["breakdown"] == {"Food": 0.6}
+    assert summary["by_category"] == [{"category": "Food", "total": 0.6, "count": 3}]
 
 
 def test_export_csv(client, alice):

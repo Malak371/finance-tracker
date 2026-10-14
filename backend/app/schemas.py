@@ -115,6 +115,15 @@ class BudgetOut(ORMModel):
 # --- dashboard ---
 
 
+class CategoryTotal(BaseModel):
+    category: str
+    total: MoneyOut
+    count: int
+
+
 class DashboardSummary(BaseModel):
+    month: str
     total_spent: MoneyOut
-    breakdown: dict[str, MoneyOut]
+    previous_month_total: MoneyOut
+    transaction_count: int
+    by_category: list[CategoryTotal]
