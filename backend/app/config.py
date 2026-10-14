@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=60, gt=0)
     # bcrypt work factor; tests lower it to keep the suite fast.
     bcrypt_rounds: int = Field(default=12, ge=4, le=16)
+    # Abuse protection for "Try the demo"; end-to-end tests raise it.
+    demo_accounts_per_hour: int = Field(default=5, gt=0)
     # Comma-separated list of allowed browser origins, e.g. "https://app.example.com,http://localhost:5173"
     cors_origins: str = "http://localhost:5173"
 

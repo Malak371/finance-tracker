@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import delete, select
 
 from app import demo, models, schemas, security
+from app.config import get_settings
 from app.deps import DB, CurrentUser
 from app.ratelimit import SlidingWindowLimiter
 
@@ -75,7 +76,7 @@ def me(user: CurrentUser):
 
 DEMO_TTL = timedelta(hours=24)
 MAX_DEMO_USERS = 100
-demo_limiter = SlidingWindowLimiter(limit=5, window=3600)
+demo_limiter = SlidingWindowLimiter(limit=get_settings().demo_accounts_per_hour, window=3600)
 
 
 def _remove_old_demo_users(db: DB) -> None:
