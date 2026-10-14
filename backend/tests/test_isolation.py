@@ -51,8 +51,7 @@ def test_lists_and_aggregates_only_show_own_data(client, alices_data, bob):
     summary = client.get("/dashboard/summary", params={"month": "2026-01"}, headers=bob).json()
     assert summary["total_spent"] == 0
     assert summary["by_category"] == []
-    assert client.get("/expenses/trends/weekly", headers=bob).json() == []
-    assert client.get("/expenses/trends/monthly", headers=bob).json() == []
+    assert client.get("/categories", headers=bob).json() == []
     assert "Alice only" not in client.get("/expenses/export", headers=bob).text
 
 

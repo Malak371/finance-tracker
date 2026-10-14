@@ -88,3 +88,10 @@ def test_missing_expense_returns_consistent_404(client, alice):
     response = client.delete("/expenses/12345", headers=alice)
     assert response.status_code == 404
     assert response.json() == {"error": {"code": "not_found", "message": "Expense not found"}}
+
+
+def test_categories_lists_expense_and_budget_categories(client, alice):
+    add(client, alice, category="food")
+    add(client, alice, category="Rent")
+    client.post("/budgets", json={"category": "Travel", "amount": 100}, headers=alice)
+    assert client.get("/categories", headers=alice).json() == ["food", "Rent", "Travel"]
