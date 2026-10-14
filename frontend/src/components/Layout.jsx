@@ -23,7 +23,7 @@ const NAV_ITEMS = [
 ];
 
 function navClass({ isActive }) {
-  return `flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
+  return `flex shrink-0 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition sm:justify-start ${
     isActive
       ? "bg-emerald-50 text-emerald-700"
       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -62,11 +62,11 @@ export default function Layout() {
           </div>
           <nav
             aria-label="Main"
-            className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-1 lg:flex-col lg:pb-0"
+            className="grid grid-cols-3 gap-1 px-3 pb-3 sm:flex sm:flex-wrap lg:flex-1 lg:flex-col lg:flex-nowrap lg:pb-0"
           >
             {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
               <NavLink key={to} to={to} end={end} className={navClass}>
-                <Icon className="size-4" aria-hidden />
+                <Icon className="size-4 shrink-0" aria-hidden />
                 {label}
               </NavLink>
             ))}
