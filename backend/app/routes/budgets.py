@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from database import get_db
-from models import Budget 
-from schemas import BudgetCreate, BudgetOut
+from app.database import get_db
+from app.models import Budget 
+from app.schemas import BudgetCreate, BudgetOut
 from .auth import get_current_user
 from fastapi import HTTPException
 

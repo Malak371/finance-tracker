@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-from database import get_db
-import models
+from app.database import get_db
+from app import models
 from sqlalchemy import func
 
 router = APIRouter(prefix="/expenses/trends", tags=["Trends"])
