@@ -271,3 +271,11 @@ class RecurringChargeOut(BaseModel):
 class RecurringSummary(BaseModel):
     monthly_total: MoneyOut
     charges: list[RecurringChargeOut]
+
+
+class InsightOut(BaseModel):
+    kind: Literal["spike", "drop", "large_purchase", "new_merchants", "price_increase", "forecast"]
+    tone: Literal["warning", "info", "positive"]
+    title: str
+    detail: str
+    category: str | None

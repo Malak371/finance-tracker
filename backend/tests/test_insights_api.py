@@ -19,3 +19,14 @@ def test_recurring_endpoint_finds_subscriptions_and_totals_active_ones(client, a
     assert summary["monthly_total"] == 50.48
 
     assert client.get("/insights/recurring", headers=bob).json() == {"monthly_total": 0, "charges": []}
+
+
+def test_insights_endpoint_on_demo_data_and_privacy(client, bob):
+    token = client.post("/auth/demo").json()["access_token"]
+    demo = {"Authorization": f"Bearer {token}"}
+
+    insights = client.get("/insights", headers=demo).json()
+    assert 1 <= len(insights) <= 6
+    assert {"kind", "tone", "title", "detail", "category"} <= set(insights[0])
+    assert client.get("/insights", headers=bob).json() == []
+    assert client.get("/insights", params={"month": "bad"}, headers=demo).status_code == 422
