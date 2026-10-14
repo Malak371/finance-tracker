@@ -1,7 +1,7 @@
 import re
 from datetime import date, timedelta
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import (
     AfterValidator,
@@ -127,3 +127,57 @@ class DashboardSummary(BaseModel):
     previous_month_total: MoneyOut
     transaction_count: int
     by_category: list[CategoryTotal]
+
+
+# --- CSV import ---
+
+
+class ParsedFile(BaseModel):
+    headers: list[str]
+    rows: list[list[str]]
+    suggested_mapping: dict
+
+
+class ColumnMappingIn(BaseModel):
+    date_column: int = Field(ge=0)
+    description_column: int = Field(ge=0)
+    amount_mode: Literal["single", "split"] = "single"
+    amount_column: int | None = Field(default=None, ge=0)
+    debit_column: int | None = Field(default=None, ge=0)
+    credit_column: int | None = Field(default=None, ge=0)
+    expense_sign: Literal["negative", "positive"] = "negative"
+    date_format: str
+    category_column: int | None = Field(default=None, ge=0)
+
+
+class PreviewRequest(BaseModel):
+    mapping: ColumnMappingIn
+    rows: list[list[Annotated[str, Field(max_length=1000)]]] = Field(max_length=5000)
+
+
+class PreviewTransaction(BaseModel):
+    row: int
+    date: date
+    amount: MoneyOut
+    description: str
+    category: str
+    category_source: str
+    duplicate: bool
+
+
+class SkippedRow(BaseModel):
+    row: int
+    reason: str
+
+
+class PreviewResponse(BaseModel):
+    transactions: list[PreviewTransaction]
+    skipped: list[SkippedRow]
+
+
+class ImportRequest(BaseModel):
+    transactions: list[ExpenseIn] = Field(min_length=1, max_length=5000)
+
+
+class ImportResult(BaseModel):
+    imported: int

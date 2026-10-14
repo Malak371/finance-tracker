@@ -9,7 +9,7 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy import func, select
+from sqlalchemy import func, select, union
 from sqlalchemy.orm import Session
 
 from app import models, security
@@ -55,3 +55,20 @@ def canonical_category(db: Session, user: models.User, name: str) -> str:
         if existing:
             return existing
     return name
+
+
+class CategoryLookup:
+    """Batch version of canonical_category: loads the user's category names once."""
+
+    def __init__(self, db: Session, user: models.User):
+        names = db.scalars(
+            union(
+                select(models.Expense.category).where(models.Expense.user_id == user.id),
+                select(models.Budget.category).where(models.Budget.user_id == user.id),
+            )
+        )
+        self._by_lower = {name.lower(): name for name in names}
+
+    def canonical(self, name: str) -> str:
+        # New names are remembered too, so "food" and "Food" in one import end up the same.
+        return self._by_lower.setdefault(name.lower(), name)

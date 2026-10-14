@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.errors import register_error_handlers
-from app.routes import auth, budgets, categories, dashboard, expenses
+from app.routes import auth, budgets, categories, dashboard, expenses, imports
 
 app = FastAPI(title="Finance Tracker API", version="1.0.0")
 
@@ -20,6 +20,7 @@ app.include_router(expenses.router)
 app.include_router(dashboard.router)
 app.include_router(budgets.router)
 app.include_router(categories.router)
+app.include_router(imports.router)
 
 
 @app.get("/health", tags=["meta"])
