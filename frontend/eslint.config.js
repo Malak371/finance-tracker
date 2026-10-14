@@ -25,6 +25,7 @@ export default [
   {
     files: ["**/*.test.{js,jsx}", "src/test/**"],
     languageOptions: { globals: { ...globals.node } },
+    rules: { "react-refresh/only-export-components": "off" },
   },
   prettier,
 ];
