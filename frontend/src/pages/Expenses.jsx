@@ -148,10 +148,13 @@ export default function Expenses() {
               icon={ReceiptText}
               title={`No expenses in ${formatMonth(month)}`}
               action={
-                <Button onClick={() => setEditing("new")}>
-                  <Plus className="size-4" aria-hidden />
-                  Add expense
-                </Button>
+                // Hidden while the form is already open above.
+                !editing && (
+                  <Button onClick={() => setEditing("new")}>
+                    <Plus className="size-4" aria-hidden />
+                    Add expense
+                  </Button>
+                )
               }
             >
               {category ? `Nothing in ${category} this month.` : "Add one to start tracking."}

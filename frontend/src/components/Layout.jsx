@@ -8,6 +8,7 @@ import {
   Tags,
   Wallet,
 } from "lucide-react";
+import { startTransition } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { CategoriesProvider } from "../context/CategoriesContext";
@@ -35,8 +36,12 @@ export default function Layout() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
-    navigate("/");
+    // One transition for both updates: logging out on its own would re-render this protected
+    // page first, which redirects to /login instead of the home page.
+    startTransition(() => {
+      navigate("/");
+      logout();
+    });
   };
 
   return (

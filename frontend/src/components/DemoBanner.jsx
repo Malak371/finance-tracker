@@ -1,4 +1,5 @@
 import { Info } from "lucide-react";
+import { startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useApi } from "../hooks/useApi";
@@ -10,8 +11,11 @@ export default function DemoBanner() {
   if (!me.data?.is_demo) return null;
 
   const signUp = () => {
-    logout();
-    navigate("/signup");
+    // Same transition for both updates, so the protected page doesn't redirect to /login first.
+    startTransition(() => {
+      navigate("/signup");
+      logout();
+    });
   };
 
   return (
