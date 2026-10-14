@@ -246,3 +246,25 @@ class RuleCreated(RuleOut):
 class DefaultRule(BaseModel):
     keyword: str
     category: str
+
+
+# --- insights ---
+
+
+class RecurringChargeOut(BaseModel):
+    merchant: str
+    category: str
+    cadence: Literal["weekly", "fortnightly", "monthly", "quarterly", "yearly"]
+    amount: MoneyOut
+    monthly_cost: MoneyOut
+    occurrences: int
+    first_date: date
+    last_date: date
+    next_date: date
+    active: bool
+    previous_amount: MoneyOut | None
+
+
+class RecurringSummary(BaseModel):
+    monthly_total: MoneyOut
+    charges: list[RecurringChargeOut]
