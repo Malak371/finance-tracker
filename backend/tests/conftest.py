@@ -14,6 +14,7 @@ TEST_DATABASE_URL = os.environ.get(
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 os.environ["JWT_SECRET"] = "test-secret-that-is-at-least-32-characters-long"
 os.environ["CORS_ORIGINS"] = "http://localhost:5173"
+os.environ["BCRYPT_ROUNDS"] = "4"
 
 from collections.abc import Callable, Iterator  # noqa: E402
 from pathlib import Path  # noqa: E402
