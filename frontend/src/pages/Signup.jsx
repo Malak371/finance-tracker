@@ -11,7 +11,7 @@ export default function Signup() {
   const handleSignup = async ({ email, password }) => {
     await api.post("/auth/signup", { email, password });
     login(await requestToken(email, password));
-    navigate("/", { replace: true });
+    navigate("/app", { replace: true });
   };
 
   return (

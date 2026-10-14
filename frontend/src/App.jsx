@@ -3,8 +3,10 @@ import Layout from "./components/Layout";
 import { GuestRoute, ProtectedRoute } from "./components/ProtectedRoute";
 import Budgets from "./pages/Budgets";
 import Dashboard from "./pages/Dashboard";
+import DemoStart from "./pages/DemoStart";
 import Expenses from "./pages/Expenses";
 import Import from "./pages/Import";
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Recurring from "./pages/Recurring";
 import Rules from "./pages/Rules";
@@ -14,6 +16,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/demo" element={<DemoStart />} />
         <Route
           path="/login"
           element={
@@ -31,6 +35,7 @@ export default function App() {
           }
         />
         <Route
+          path="/app"
           element={
             <ProtectedRoute>
               <Layout />

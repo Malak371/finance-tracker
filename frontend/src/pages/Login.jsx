@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { requestToken } from "../api/auth";
 import AuthForm from "../components/AuthForm";
 import { useAuth } from "../context/AuthContext";
@@ -6,10 +6,12 @@ import { useAuth } from "../context/AuthContext";
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogin = async ({ email, password }) => {
     login(await requestToken(email, password));
-    navigate("/", { replace: true });
+    // Return to the page that sent the visitor here, if any.
+    navigate(location.state?.from?.pathname ?? "/app", { replace: true });
   };
 
   return (

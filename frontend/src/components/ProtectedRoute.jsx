@@ -10,6 +10,6 @@ export function ProtectedRoute({ children }) {
 
 export function GuestRoute({ children }) {
   const { token } = useAuth();
-  if (token) return <Navigate to="/" replace />;
+  if (token) return <Navigate to="/app" replace />;
   return children;
 }

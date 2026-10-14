@@ -84,7 +84,7 @@ export default function Import() {
                 Import another file
               </Button>
               <Link
-                to="/expenses"
+                to="/app/expenses"
                 className="inline-flex items-center rounded-lg bg-emerald-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-emerald-700"
               >
                 View expenses

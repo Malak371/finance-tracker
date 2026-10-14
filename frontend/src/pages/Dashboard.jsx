@@ -108,7 +108,7 @@ export default function Dashboard() {
                 title={`No spending recorded for ${formatMonth(month)}`}
                 action={
                   <Link
-                    to="/expenses"
+                    to="/app/expenses"
                     className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-emerald-700"
                   >
                     <Plus className="size-4" aria-hidden />
@@ -139,7 +139,7 @@ export default function Dashboard() {
                   <CardTitle
                     action={
                       <Link
-                        to={`/budgets?month=${month}`}
+                        to={`/app/budgets?month=${month}`}
                         className="text-sm font-medium text-emerald-700 hover:underline"
                       >
                         Manage
@@ -161,7 +161,7 @@ export default function Dashboard() {
                 <CardTitle
                   action={
                     <Link
-                      to={`/expenses?month=${month}`}
+                      to={`/app/expenses?month=${month}`}
                       className="text-sm font-medium text-emerald-700 hover:underline"
                     >
                       View all
