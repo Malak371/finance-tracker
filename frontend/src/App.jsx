@@ -1,37 +1,49 @@
-import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
-import Signup from "./pages/Signup";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import Layout from "./components/Layout";
+import { GuestRoute, ProtectedRoute } from "./components/ProtectedRoute";
 import Budgets from "./pages/Budgets";
+import Dashboard from "./pages/Dashboard";
+import Expenses from "./pages/Expenses";
+import Import from "./pages/Import";
+import Login from "./pages/Login";
+import Rules from "./pages/Rules";
+import Signup from "./pages/Signup";
 
-function App() {
+export default function App() {
   return (
-    <Router>
-      <Navbar />
+    <BrowserRouter>
       <Routes>
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute>
-                <Home />
-            </ProtectedRoute>
-          } 
-        />
         <Route
-          path="/budgets"
+          path="/login"
           element={
-            <ProtectedRoute>
-              <Budgets />
-            </ProtectedRoute>
+            <GuestRoute>
+              <Login />
+            </GuestRoute>
           }
         />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/signup"
+          element={
+            <GuestRoute>
+              <Signup />
+            </GuestRoute>
+          }
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="expenses" element={<Expenses />} />
+          <Route path="budgets" element={<Budgets />} />
+          <Route path="import" element={<Import />} />
+          <Route path="rules" element={<Rules />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
-
-export default App;

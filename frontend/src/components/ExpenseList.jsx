@@ -1,128 +1,74 @@
-import {useEffect, useState} from "react";
-import api from "../api/api";
+import { Pencil, Sparkles, Trash2 } from "lucide-react";
+import { useCategories } from "../context/CategoriesContext";
+import { formatDate, formatMoney } from "../lib/format";
 
-export default function ExpenseList({ expenses, refresh }) {
-  const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({ category: "", amount: 0, date: "", description: "" });
-
-  const handleExport = async () => {
-  try {
-    const res = await api.get("/expenses/export", {
-      responseType: "blob",
-    });
-
-    const url = window.URL.createObjectURL(new Blob([res.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "expenses.csv");
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } catch (err) {
-    console.error("Export failed:", err);
-  }
-};
-const startEdit = (expense) => {
-    setEditingId(expense.id);
-    setEditData({
-      category: expense.category,
-      amount: expense.amount,
-      date: expense.date,
-      description: expense.description || "",
-    });
-  };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditData({ category: "", amount: 0, date: "", description: "" });
-  };
-
-  const saveEdit = async (id) => {
-    try {
-      await api.put(`/expenses/${id}`, editData);
-      cancelEdit();
-      refresh();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this expense?")) return;
-    try {
-      await api.delete(`/expenses/${id}`);
-      refresh();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
+export function CategoryBadge({ category }) {
+  const { colorOf } = useCategories();
   return (
-    <div className="rounded-2xl bg-gray-800 p-6 shadow-lg shadow-cyan-500/50">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
-        <h3 className="text-xl font-bold text-cyan-400">Expenses</h3>
-        <button
-          onClick={handleExport}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          Export CSV
-        </button>
-      </div>
-
-      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-300">
-        {expenses.map((e) => (
-          <li key={e.id} className="rounded-lg bg-gray-700 px-4 py-2 flex flex-col shadow-sm">
-            {editingId === e.id ? (
-              <div className="flex flex-col gap-2">
-                <input
-                  type="text"
-                  value={editData.category}
-                  onChange={(ev) => setEditData({ ...editData, category: ev.target.value })}
-                  className="p-1 rounded text-black"
-                />
-                <input
-                  type="number"
-                  value={editData.amount}
-                  onChange={(ev) => setEditData({ ...editData, amount: parseFloat(ev.target.value) })}
-                  className="p-1 rounded text-black"
-                />
-                <input
-                  type="date"
-                  value={editData.date}
-                  onChange={(ev) => setEditData({ ...editData, date: ev.target.value })}
-                  className="p-1 rounded text-black"
-                />
-                <input
-                  type="text"
-                  value={editData.description}
-                  onChange={(ev) => setEditData({ ...editData, description: ev.target.value })}
-                  className="p-1 rounded text-black"
-                  placeholder="Description"
-                />
-                <div className="flex gap-2">
-                  <button onClick={() => saveEdit(e.id)} className="bg-blue-600 px-2 rounded">Save</button>
-                  <button onClick={cancelEdit} className="bg-gray-500 px-2 rounded">Cancel</button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-semibold">{e.category}</span>
-                  <span className="text-cyan-300 font-bold">${e.amount}</span>
-                </div>
-                <div className="text-sm text-gray-400">
-                  {e.date} {e.description && `— ${e.description}`}
-                </div>
-                <div className="flex gap-2 mt-2">
-                  <button onClick={() => startEdit(e)} className="bg-yellow-500 px-2 rounded">Edit</button>
-                  <button onClick={() => handleDelete(e.id)} className="bg-red-500 px-2 rounded">Delete</button>
-                </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+      <span
+        className="size-2 rounded-full"
+        style={{ backgroundColor: colorOf(category) }}
+        aria-hidden
+      />
+      {category}
+    </span>
   );
+}
 
+const AUTO_SOURCES = new Set(["rule", "history", "model", "default"]);
+
+export default function ExpenseList({ expenses, onEdit, onDelete }) {
+  return (
+    <ul className="divide-y divide-slate-100">
+      {expenses.map((expense) => (
+        <li key={expense.id} className="flex items-center gap-3 py-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-slate-900">
+              {expense.description || expense.category}
+            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <time dateTime={expense.date}>{formatDate(expense.date)}</time>
+              <CategoryBadge category={expense.category} />
+              {AUTO_SOURCES.has(expense.category_source) && (
+                <span title="Categorised automatically. Edit to correct it and the categoriser learns.">
+                  <Sparkles
+                    className="size-3.5 text-violet-500"
+                    aria-label="Categorised automatically"
+                  />
+                </span>
+              )}
+            </div>
+          </div>
+          <p className="text-sm font-semibold whitespace-nowrap text-slate-900 tabular-nums">
+            {formatMoney(expense.amount)}
+          </p>
+          {(onEdit || onDelete) && (
+            <div className="flex shrink-0 gap-1">
+              {onEdit && (
+                <button
+                  type="button"
+                  onClick={() => onEdit(expense)}
+                  className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                  aria-label={`Edit ${expense.description || expense.category}`}
+                >
+                  <Pencil className="size-4" aria-hidden />
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  type="button"
+                  onClick={() => onDelete(expense)}
+                  className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                  aria-label={`Delete ${expense.description || expense.category}`}
+                >
+                  <Trash2 className="size-4" aria-hidden />
+                </button>
+              )}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
 }
