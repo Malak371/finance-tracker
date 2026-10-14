@@ -9,6 +9,7 @@ from app.main import app
 PUBLIC_ROUTES = {
     ("POST", "/auth/signup"),
     ("POST", "/auth/login"),
+    ("POST", "/auth/demo"),
     ("GET", "/health"),
 }
 

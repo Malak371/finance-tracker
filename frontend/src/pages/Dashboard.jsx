@@ -1,4 +1,5 @@
 import { ArrowDownRight, ArrowUpRight, PieChart, Plus } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import BudgetAlerts from "../components/BudgetAlerts";
 import BudgetProgress from "../components/BudgetProgress";
@@ -6,6 +7,7 @@ import CategoryBreakdown from "../components/CategoryBreakdown";
 import DailySpendingChart from "../components/DailySpendingChart";
 import ExpenseList from "../components/ExpenseList";
 import MonthPicker from "../components/MonthPicker";
+import MonthlyTrendChart from "../components/MonthlyTrendChart";
 import {
   Card,
   CardTitle,
@@ -30,21 +32,23 @@ function StatCard({ label, value, children }) {
   );
 }
 
-function MonthOverMonth({ current, previous }) {
-  if (!previous) return <span className="text-slate-500">No spending last month</span>;
+function MonthOverMonth({ current, previous, comparison }) {
+  const baseline = comparison === "month_to_date" ? "this point last month" : "last month";
+  if (!previous) return <span className="text-slate-500">No spending by {baseline}</span>;
   const change = ((current - previous) / previous) * 100;
   const up = change > 0;
   const Icon = up ? ArrowUpRight : ArrowDownRight;
   return (
     <span className={`inline-flex items-center gap-1 ${up ? "text-red-600" : "text-emerald-600"}`}>
       <Icon className="size-4" aria-hidden />
-      {Math.abs(change).toFixed(0)}% {up ? "more" : "less"} than last month
+      {Math.abs(change).toFixed(0)}% {up ? "more" : "less"} than {baseline}
     </span>
   );
 }
 
 export default function Dashboard() {
   const [month, setMonth] = useMonthParam();
+  const [trendCategory, setTrendCategory] = useState("");
   const summary = useApi("/dashboard/summary", { month });
   const expenses = useApi("/expenses", monthRange(month));
   const budgets = useApi("/budgets/status", { month });
@@ -75,6 +79,7 @@ export default function Dashboard() {
               <MonthOverMonth
                 current={summary.data.total_spent}
                 previous={summary.data.previous_month_total}
+                comparison={summary.data.comparison}
               />
             </StatCard>
             <StatCard label="Transactions" value={summary.data.transaction_count} />
@@ -86,6 +91,15 @@ export default function Dashboard() {
               )}
             </StatCard>
           </div>
+
+          <Card>
+            <MonthlyTrendChart
+              month={month}
+              category={trendCategory}
+              onCategoryChange={setTrendCategory}
+              onSelectMonth={setMonth}
+            />
+          </Card>
 
           {summary.data.transaction_count === 0 ? (
             <Card>

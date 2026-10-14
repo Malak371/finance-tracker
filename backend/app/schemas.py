@@ -60,7 +60,8 @@ class UserCreate(BaseModel):
 
 class UserOut(ORMModel):
     id: int
-    email: EmailStr
+    email: str
+    is_demo: bool = False
 
 
 class Token(BaseModel):
@@ -131,10 +132,16 @@ class CategoryTotal(BaseModel):
     count: int
 
 
+class MonthTotal(BaseModel):
+    month: str
+    total: MoneyOut
+
+
 class DashboardSummary(BaseModel):
     month: str
     total_spent: MoneyOut
     previous_month_total: MoneyOut
+    comparison: Literal["full_month", "month_to_date"]
     transaction_count: int
     by_category: list[CategoryTotal]
 
@@ -241,3 +248,26 @@ class RuleCreated(RuleOut):
 class DefaultRule(BaseModel):
     keyword: str
     category: str
+
+
+# --- insights ---
+
+
+class RecurringChargeOut(BaseModel):
+    merchant: str
+    category: str
+    cadence: Literal["weekly", "fortnightly", "monthly", "quarterly", "yearly"]
+    amount: MoneyOut
+    monthly_cost: MoneyOut
+    occurrences: int
+    first_date: date
+    last_date: date
+    next_date: date
+    active: bool
+    previous_amount: MoneyOut | None
+    price_changed_on: date | None
+
+
+class RecurringSummary(BaseModel):
+    monthly_total: MoneyOut
+    charges: list[RecurringChargeOut]

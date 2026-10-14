@@ -14,6 +14,7 @@ TEST_DATABASE_URL = os.environ.get(
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 os.environ["JWT_SECRET"] = "test-secret-that-is-at-least-32-characters-long"
 os.environ["CORS_ORIGINS"] = "http://localhost:5173"
+os.environ["BCRYPT_ROUNDS"] = "4"
 
 from collections.abc import Callable, Iterator  # noqa: E402
 from pathlib import Path  # noqa: E402
@@ -46,6 +47,13 @@ def clean_tables() -> Iterator[None]:
     tables = ", ".join(table.name for table in Base.metadata.sorted_tables)
     with engine.begin() as conn:
         conn.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limits() -> None:
+    from app.routes.auth import demo_limiter
+
+    demo_limiter.reset()
 
 
 @pytest.fixture
