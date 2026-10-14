@@ -90,8 +90,11 @@ def test_missing_expense_returns_consistent_404(client, alice):
     assert response.json() == {"error": {"code": "not_found", "message": "Expense not found"}}
 
 
-def test_categories_lists_expense_and_budget_categories(client, alice):
-    add(client, alice, category="food")
+def test_categories_are_listed_in_order_of_first_use(client, alice):
     add(client, alice, category="Rent")
+    add(client, alice, category="food")
     client.post("/budgets", json={"category": "Travel", "amount": 100}, headers=alice)
-    assert client.get("/categories", headers=alice).json() == ["food", "Rent", "Travel"]
+    add(client, alice, category="Books")
+    add(client, alice, category="FOOD")
+    # New categories are appended, so earlier ones keep their position (and colour).
+    assert client.get("/categories", headers=alice).json() == ["Rent", "food", "Books", "Travel"]

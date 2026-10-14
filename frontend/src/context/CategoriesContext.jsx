@@ -12,8 +12,13 @@ const CategoriesContext = createContext({
 export function CategoriesProvider({ children }) {
   const { data, reload } = useApi("/categories");
   const value = useMemo(() => {
-    const categories = data ?? [];
-    return { categories, colorOf: makeColorOf(categories), reload };
+    // The API lists categories in order of first use, which keeps colour slots stable as new
+    // categories appear; forms and filters show them alphabetically.
+    const firstUsed = data ?? [];
+    const categories = [...firstUsed].sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: "base" }),
+    );
+    return { categories, colorOf: makeColorOf(firstUsed), reload };
   }, [data, reload]);
   return <CategoriesContext.Provider value={value}>{children}</CategoriesContext.Provider>;
 }

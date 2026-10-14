@@ -12,9 +12,10 @@ export const CATEGORY_PALETTE = [
 export const OTHER_COLOR = "#94a3b8";
 
 /**
- * Colour follows the category, not its rank: each of the user's categories gets a slot by its
- * position in their (alphabetical) category list, so it keeps the same colour on every page and
- * month. Past the palette size we fall back to neutral grey instead of cycling hues.
+ * Colour follows the category, not its rank: each of the user's categories gets a slot by the
+ * order in which they first used it, so it keeps the same colour on every page and month, and
+ * adding a category never repaints existing ones. Past the palette size we fall back to neutral
+ * grey instead of cycling hues.
  */
 export function makeColorOf(categories) {
   const slots = new Map(categories.map((c, i) => [c.toLowerCase(), CATEGORY_PALETTE[i]]));
