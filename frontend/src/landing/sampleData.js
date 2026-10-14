@@ -96,3 +96,31 @@ export const SAMPLE_RECURRING = [
     price_changed_on: null,
   },
 ];
+
+export const SAMPLE_INSIGHTS = [
+  {
+    kind: "forecast",
+    tone: "warning",
+    title: "On track for about $3,040.00 this month",
+    detail:
+      "$2,443.26 so far plus your usual spending for the rest of the month; 17% more than your recent average of $2,611.01.",
+  },
+  {
+    kind: "price_increase",
+    tone: "warning",
+    title: "NETFLIX.COM went up 16%",
+    detail: "Now $17.99 instead of $15.49, about $30.00 more a year.",
+  },
+  {
+    kind: "large_purchase",
+    tone: "info",
+    title: "Unusually large Shopping purchase",
+    detail: "$389.99 at BEST BUY on Oct 1, about 8x your typical $46.26.",
+  },
+  {
+    kind: "drop",
+    tone: "positive",
+    title: "Dining is 42% below usual",
+    detail: "$88.40 vs. your average of $152.10 by this point in the month.",
+  },
+];

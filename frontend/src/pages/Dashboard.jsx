@@ -5,6 +5,7 @@ import BudgetAlerts from "../components/BudgetAlerts";
 import BudgetProgress from "../components/BudgetProgress";
 import CategoryBreakdown from "../components/CategoryBreakdown";
 import DailySpendingChart from "../components/DailySpendingChart";
+import InsightsCard from "../components/InsightsCard";
 import ExpenseList from "../components/ExpenseList";
 import MonthPicker from "../components/MonthPicker";
 import MonthlyTrendChart from "../components/MonthlyTrendChart";
@@ -91,6 +92,8 @@ export default function Dashboard() {
               )}
             </StatCard>
           </div>
+
+          <InsightsCard month={month} />
 
           <Card>
             <MonthlyTrendChart

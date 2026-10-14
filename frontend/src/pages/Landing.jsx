@@ -2,6 +2,7 @@ import {
   ArrowRight,
   CodeXml,
   FileUp,
+  Lightbulb,
   LineChart,
   PiggyBank,
   Repeat,
@@ -15,6 +16,7 @@ import BudgetProgress from "../components/BudgetProgress";
 import CategoryBreakdown from "../components/CategoryBreakdown";
 import DemoButton from "../components/DemoButton";
 import { CategoryBadge } from "../components/ExpenseList";
+import { InsightList } from "../components/InsightsCard";
 import { SourceBadge } from "../components/import/ReviewStep";
 import { useAuth } from "../context/AuthContext";
 import { StaticCategoriesProvider } from "../context/CategoriesContext";
@@ -23,6 +25,7 @@ import {
   SAMPLE_BY_CATEGORY,
   SAMPLE_CATEGORIES,
   SAMPLE_IMPORT_ROWS,
+  SAMPLE_INSIGHTS,
   SAMPLE_RECURRING,
   SAMPLE_TOTAL,
 } from "../landing/sampleData";
@@ -274,6 +277,28 @@ export default function Landing() {
               </FeatureRow>
 
               <FeatureRow
+                icon={Lightbulb}
+                eyebrow="Insights"
+                title="It notices what you'd miss"
+                preview={
+                  <PreviewFrame label="Insights · October 2026">
+                    <InsightList insights={SAMPLE_INSIGHTS} />
+                  </PreviewFrame>
+                }
+              >
+                <p>
+                  Every month is compared with your own history, at the same day of the month:
+                  spikes and drops by category, purchases far above your usual, new merchants,
+                  subscription price rises, and a forecast for the month&apos;s total.
+                </p>
+                <p>
+                  Thresholds are deliberately conservative (outside your normal variation, not just
+                  a bit higher) so the cards stay worth reading.
+                </p>
+              </FeatureRow>
+
+              <FeatureRow
+                reverse
                 icon={PiggyBank}
                 eyebrow="Budgets with alerts"
                 title="Warnings before the month is over"
@@ -296,7 +321,6 @@ export default function Landing() {
               </FeatureRow>
 
               <FeatureRow
-                reverse
                 icon={Repeat}
                 eyebrow="Subscriptions"
                 title="Every recurring charge, found for you"
