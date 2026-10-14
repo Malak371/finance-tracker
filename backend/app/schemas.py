@@ -94,6 +94,7 @@ class ExpenseOut(ORMModel):
     id: int
     amount: MoneyOut
     category: str
+    category_source: str
     date: date
     description: str | None
 
@@ -162,6 +163,7 @@ class PreviewTransaction(BaseModel):
     description: str
     category: str
     category_source: str
+    confidence: float | None
     duplicate: bool
 
 
@@ -175,9 +177,58 @@ class PreviewResponse(BaseModel):
     skipped: list[SkippedRow]
 
 
+CategorySource = Literal["manual", "file", "rule", "model", "default", "none"]
+
+
+class ImportTransaction(ExpenseIn):
+    # "manual" when the user picked or changed the category in the preview, which makes the
+    # row training data for their classifier; otherwise the source the preview suggested.
+    category_source: CategorySource = "manual"
+
+
 class ImportRequest(BaseModel):
-    transactions: list[ExpenseIn] = Field(min_length=1, max_length=5000)
+    transactions: list[ImportTransaction] = Field(min_length=1, max_length=5000)
 
 
 class ImportResult(BaseModel):
     imported: int
+
+
+# --- categorisation rules ---
+
+
+def _normalize_keyword(value: str) -> str:
+    from app.categorization import normalize
+
+    keyword = normalize(value)
+    if len(keyword) < 2:
+        raise ValueError("must contain at least 2 letters or digits")
+    return keyword
+
+
+Keyword = Annotated[str, Field(max_length=100), AfterValidator(_normalize_keyword)]
+
+
+class RuleIn(BaseModel):
+    keyword: Keyword
+    category: Category
+
+
+class RuleCreate(RuleIn):
+    # Also re-categorise existing expenses that were auto-categorised or left Uncategorized.
+    apply_to_existing: bool = False
+
+
+class RuleOut(ORMModel):
+    id: int
+    keyword: str
+    category: str
+
+
+class RuleCreated(RuleOut):
+    applied: int
+
+
+class DefaultRule(BaseModel):
+    keyword: str
+    category: str

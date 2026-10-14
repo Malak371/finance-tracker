@@ -12,7 +12,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import func, select, union
 from sqlalchemy.orm import Session
 
-from app import models, security
+from app import categorization, models, security
 from app.database import get_db
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -35,7 +35,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: DB) -> m
 CurrentUser = Annotated[models.User, Depends(get_current_user)]
 
 
-def get_owned_or_404[OwnedModel: (models.Expense, models.Budget)](
+def get_owned_or_404[OwnedModel: (models.Expense, models.Budget, models.CategoryRule)](
     db: Session, model: type[OwnedModel], row_id: int, user: models.User
 ) -> OwnedModel:
     row = db.scalar(select(model).where(model.id == row_id, model.user_id == user.id))
@@ -72,3 +72,20 @@ class CategoryLookup:
     def canonical(self, name: str) -> str:
         # New names are remembered too, so "food" and "Food" in one import end up the same.
         return self._by_lower.setdefault(name.lower(), name)
+
+
+def load_categorizer(db: Session, user: models.User) -> categorization.Categorizer:
+    rules = db.execute(
+        select(models.CategoryRule.keyword, models.CategoryRule.category).where(
+            models.CategoryRule.user_id == user.id
+        )
+    ).all()
+    training = db.execute(
+        select(models.Expense.description, models.Expense.category).where(
+            models.Expense.user_id == user.id,
+            models.Expense.description.is_not(None),
+            models.Expense.category_source.in_(categorization.USER_LABELLED_SOURCES),
+            models.Expense.category != categorization.UNCATEGORIZED,
+        )
+    ).all()
+    return categorization.Categorizer(dict(rules), training)

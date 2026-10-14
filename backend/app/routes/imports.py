@@ -4,12 +4,11 @@ from fastapi import APIRouter, HTTPException, UploadFile
 from sqlalchemy import select
 
 from app import csv_import, models, schemas
-from app.deps import DB, CategoryLookup, CurrentUser
+from app.deps import DB, CategoryLookup, CurrentUser, load_categorizer
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 
 MAX_FILE_BYTES = 2 * 1024 * 1024
-UNCATEGORIZED = "Uncategorized"
 
 
 def _bad_file(error: csv_import.CSVImportError) -> HTTPException:
@@ -58,17 +57,21 @@ def preview(payload: schemas.PreviewRequest, db: DB, user: CurrentUser):
     duplicates = csv_import.find_duplicates(transactions, existing)
 
     categories = CategoryLookup(db, user)
+    categorizer = load_categorizer(db, user)
     preview_rows = []
     for transaction, duplicate in zip(transactions, duplicates, strict=True):
         if transaction.category:
-            category, source = categories.canonical(transaction.category), "file"
+            category, source, confidence = categories.canonical(transaction.category), "file", None
         else:
-            category, source = UNCATEGORIZED, "none"
+            suggestion = categorizer.suggest(transaction.description)
+            category = categories.canonical(suggestion.category)
+            source, confidence = suggestion.source, suggestion.confidence
         preview_rows.append(
             {
                 **asdict(transaction),
                 "category": category,
                 "category_source": source,
+                "confidence": confidence,
                 "duplicate": duplicate,
             }
         )
@@ -87,6 +90,7 @@ def commit(payload: schemas.ImportRequest, db: DB, user: CurrentUser):
                 category=categories.canonical(item.category),
                 date=item.date,
                 description=item.description,
+                category_source=item.category_source,
             )
         )
     db.commit()

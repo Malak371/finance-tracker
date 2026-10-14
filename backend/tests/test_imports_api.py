@@ -32,7 +32,11 @@ def test_full_import_flow_and_reimport_is_flagged(client, alice):
     first = preview(client, alice, parsed).json()
     assert [t["description"] for t in first["transactions"]] == ["Coffee Shop", "Coffee Shop", "Grocery Mart"]
     assert all(not t["duplicate"] for t in first["transactions"])
-    assert first["transactions"][0]["category"] == "Uncategorized"
+    assert [(t["category"], t["category_source"]) for t in first["transactions"]] == [
+        ("Dining", "default"),
+        ("Dining", "default"),
+        ("Groceries", "default"),
+    ]
     assert first["skipped"] == [{"row": 4, "reason": "Money in (income or refund), not an expense"}]
 
     committed = client.post("/imports/commit", json=to_commit(first["transactions"]), headers=alice)

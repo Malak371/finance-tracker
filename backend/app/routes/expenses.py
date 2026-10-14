@@ -60,8 +60,12 @@ def export_expenses(db: DB, user: CurrentUser):
 @router.put("/{expense_id}", response_model=schemas.ExpenseOut)
 def update_expense(expense_id: int, payload: schemas.ExpenseIn, db: DB, user: CurrentUser):
     expense = get_owned_or_404(db, models.Expense, expense_id, user)
+    category = canonical_category(db, user, payload.category)
+    if category != expense.category:
+        # A changed category is a correction the classifier should learn from.
+        expense.category_source = "manual"
     expense.amount = payload.amount
-    expense.category = canonical_category(db, user, payload.category)
+    expense.category = category
     expense.date = payload.date
     expense.description = payload.description
     db.commit()
