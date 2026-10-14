@@ -1,9 +1,10 @@
 from dataclasses import asdict
+from datetime import date, timedelta
 
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, HTTPException, Response, UploadFile
 from sqlalchemy import select
 
-from app import csv_import, models, schemas
+from app import csv_import, demo, models, schemas
 from app.deps import DB, CategoryLookup, CurrentUser, load_categorizer
 
 router = APIRouter(prefix="/imports", tags=["imports"])
@@ -95,3 +96,20 @@ def commit(payload: schemas.ImportRequest, db: DB, user: CurrentUser):
         )
     db.commit()
     return {"imported": len(payload.transactions)}
+
+
+@router.get("/sample")
+def sample_statement(db: DB, user: CurrentUser):
+    """A sample bank statement to try the importer with, including a few of your recent expenses."""
+    today = date.today()
+    recent = db.scalars(
+        select(models.Expense)
+        .where(models.Expense.user_id == user.id, models.Expense.date >= today - timedelta(days=14))
+        .order_by(models.Expense.date.desc(), models.Expense.id.desc())
+        .limit(4)
+    ).all()
+    return Response(
+        content=demo.sample_statement(list(recent), today),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=sample-statement.csv"},
+    )

@@ -60,7 +60,8 @@ class UserCreate(BaseModel):
 
 class UserOut(ORMModel):
     id: int
-    email: EmailStr
+    email: str
+    is_demo: bool = False
 
 
 class Token(BaseModel):

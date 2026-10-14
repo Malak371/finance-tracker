@@ -49,6 +49,13 @@ def clean_tables() -> Iterator[None]:
         conn.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
 
 
+@pytest.fixture(autouse=True)
+def reset_rate_limits() -> None:
+    from app.routes.auth import demo_limiter
+
+    demo_limiter.reset()
+
+
 @pytest.fixture
 def db():
     with SessionLocal() as session:
