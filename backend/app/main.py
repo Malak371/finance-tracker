@@ -1,25 +1,28 @@
 from fastapi import FastAPI
-
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, expenses, dashboard, budgets, trends
+
 from app.config import get_settings
+from app.errors import register_error_handlers
+from app.routes import auth, budgets, dashboard, expenses, trends
 
-
-app = FastAPI()
+app = FastAPI(title="Finance Tracker API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_settings().cors_origin_list,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+register_error_handlers(app)
 
 app.include_router(auth.router)
+# Registered before the expenses router so /expenses/trends/* isn't captured by /expenses/{expense_id}.
+app.include_router(trends.router)
 app.include_router(expenses.router)
 app.include_router(dashboard.router)
 app.include_router(budgets.router)
-app.include_router(trends.router)
 
-@app.get("/")
-def read_root():
-    return {"message": "Finance Tracker API running"}
+
+@app.get("/health", tags=["meta"])
+def health():
+    return {"status": "ok"}

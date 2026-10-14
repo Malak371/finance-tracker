@@ -1,58 +1,74 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from app import schemas, crud, database, models
-from .auth import get_current_user
-from fastapi.responses import StreamingResponse
-from io import StringIO
 import csv
-from fastapi import HTTPException
+from datetime import date
+from io import StringIO
+
+from fastapi import APIRouter, Response, status
+from sqlalchemy import select
+
+from app import models, schemas
+from app.deps import DB, CurrentUser, canonical_category, get_owned_or_404
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 
-@router.post("/", response_model=schemas.ExpenseOut)
-def add_expense(expense: schemas.ExpenseCreate, db: Session = Depends(database.get_db), user=Depends(get_current_user)):
-    return crud.create_expense(db, user.id, expense)
 
-@router.get("/", response_model=list[schemas.ExpenseOut])
-def list_expenses(category: str = None, db: Session = Depends(database.get_db), user=Depends(get_current_user)):
-    return crud.get_expenses(db, user.id, category)
+def _user_expenses(user: models.User, category: str | None, start: date | None, end: date | None):
+    query = select(models.Expense).where(models.Expense.user_id == user.id)
+    if category:
+        query = query.where(models.Expense.category == category)
+    if start:
+        query = query.where(models.Expense.date >= start)
+    if end:
+        query = query.where(models.Expense.date <= end)
+    return query.order_by(models.Expense.date.desc(), models.Expense.id.desc())
 
-@router.put("/{expense_id}", response_model=schemas.ExpenseOut)
-def update_expense(expense_id: int, expense: schemas.ExpenseCreate, db: Session = Depends(database.get_db), user=Depends(get_current_user)):
-    db_exp = db.query(models.Expense).filter(models.Expense.id == expense_id, models.Expense.user_id == user.id).first()
-    if not db_exp:
-        raise HTTPException(status_code=404, detail="Expense not found")
-    
-    db_exp.category = expense.category
-    db_exp.amount = expense.amount
-    db_exp.date = expense.date
-    db_exp.description = expense.description
+
+@router.get("", response_model=list[schemas.ExpenseOut])
+def list_expenses(
+    db: DB,
+    user: CurrentUser,
+    category: str | None = None,
+    start: date | None = None,
+    end: date | None = None,
+):
+    return db.scalars(_user_expenses(user, category, start, end)).all()
+
+
+@router.post("", response_model=schemas.ExpenseOut, status_code=status.HTTP_201_CREATED)
+def create_expense(payload: schemas.ExpenseIn, db: DB, user: CurrentUser):
+    data = payload.model_dump()
+    data["category"] = canonical_category(db, user, payload.category)
+    expense = models.Expense(**data, user_id=user.id)
+    db.add(expense)
     db.commit()
-    db.refresh(db_exp)
-    return db_exp
-
-@router.delete("/{expense_id}", status_code=204)
-def delete_expense(expense_id: int, db: Session = Depends(database.get_db), user=Depends(get_current_user)):
-    db_exp = db.query(models.Expense).filter(models.Expense.id == expense_id, models.Expense.user_id == user.id).first()
-    if not db_exp:
-        raise HTTPException(status_code=404, detail="Expense not found")
-    db.delete(db_exp)
-    db.commit()
-    return
+    return expense
 
 
 @router.get("/export")
-def export_expenses(db: Session = Depends(database.get_db), user=Depends(get_current_user)):
-    expenses = crud.get_expenses(db, user.id)
-    
+def export_expenses(db: DB, user: CurrentUser):
     output = StringIO()
     writer = csv.writer(output)
     writer.writerow(["Date", "Category", "Amount", "Description"])
-    for e in expenses:
-        writer.writerow([e.date, e.category, e.amount, e.description])
-    output.seek(0)
-    return StreamingResponse(
-        output,
+    for e in db.scalars(_user_expenses(user, None, None, None)):
+        writer.writerow([e.date.isoformat(), e.category, f"{e.amount:.2f}", e.description or ""])
+    return Response(
+        content=output.getvalue(),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=expenses.csv"}
+        headers={"Content-Disposition": "attachment; filename=expenses.csv"},
     )
+
+
+@router.put("/{expense_id}", response_model=schemas.ExpenseOut)
+def update_expense(expense_id: int, payload: schemas.ExpenseIn, db: DB, user: CurrentUser):
+    expense = get_owned_or_404(db, models.Expense, expense_id, user)
+    expense.amount = payload.amount
+    expense.category = canonical_category(db, user, payload.category)
+    expense.date = payload.date
+    expense.description = payload.description
+    db.commit()
+    return expense
+
+
+@router.delete("/{expense_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_expense(expense_id: int, db: DB, user: CurrentUser):
+    db.delete(get_owned_or_404(db, models.Expense, expense_id, user))
+    db.commit()

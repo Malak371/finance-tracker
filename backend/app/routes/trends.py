@@ -1,47 +1,32 @@
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
-from app.database import get_db
+from datetime import date, timedelta
+
+from fastapi import APIRouter
+from sqlalchemy import func, select
+
 from app import models
-from .auth import get_current_user
-from sqlalchemy import func
+from app.deps import DB, CurrentUser
 
-router = APIRouter(prefix="/expenses/trends", tags=["Trends"])
+router = APIRouter(prefix="/expenses/trends", tags=["trends"])
 
-def get_start_dates(period: str):
-    today = datetime.today()
-    if period == "weekly":
-        start = today - timedelta(days=today.weekday())
-    elif period == "monthly":
-        start = today.replace(day=1)
-    else:
-        start = today
-    return start
+
+def _daily_totals(db: DB, user: models.User, start: date, category: str | None) -> list[dict]:
+    query = (
+        select(models.Expense.date, func.sum(models.Expense.amount))
+        .where(models.Expense.user_id == user.id, models.Expense.date >= start)
+        .group_by(models.Expense.date)
+        .order_by(models.Expense.date)
+    )
+    if category:
+        query = query.where(models.Expense.category == category)
+    return [{"date": day.isoformat(), "total": float(total)} for day, total in db.execute(query)]
+
 
 @router.get("/weekly")
-def weekly_trends(category: str | None = Query(None), db: Session = Depends(get_db), user=Depends(get_current_user)):
-    start = get_start_dates("weekly")
-    query = db.query(
-        func.date(models.Expense.date).label("date"),
-        func.sum(models.Expense.amount).label("total")
-    ).filter(models.Expense.user_id == user.id, models.Expense.date >= start)
-    
-    if category:
-        query = query.filter(models.Expense.category == category)
-        
-    results = query.group_by(func.date(models.Expense.date)).order_by(func.date(models.Expense.date)).all()
-    return [{"date": str(r.date), "total": float(r.total)} for r in results]
+def weekly_trends(db: DB, user: CurrentUser, category: str | None = None):
+    today = date.today()
+    return _daily_totals(db, user, today - timedelta(days=today.weekday()), category)
+
 
 @router.get("/monthly")
-def monthly_trends(category: str | None = Query(None), db: Session = Depends(get_db), user=Depends(get_current_user)):
-    start = get_start_dates("monthly")
-    query = db.query(
-        func.date(models.Expense.date).label("date"),
-        func.sum(models.Expense.amount).label("total")
-    ).filter(models.Expense.user_id == user.id, models.Expense.date >= start)
-    
-    if category:
-        query = query.filter(models.Expense.category == category)
-        
-    results = query.group_by(func.date(models.Expense.date)).order_by(func.date(models.Expense.date)).all()
-    return [{"date": str(r.date), "total": float(r.total)} for r in results]
+def monthly_trends(db: DB, user: CurrentUser, category: str | None = None):
+    return _daily_totals(db, user, date.today().replace(day=1), category)
